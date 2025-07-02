@@ -1,15 +1,17 @@
-import { NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+const fs = require('fs');
+const path = require('path');
 
-// Required for static export
-export const dynamic = 'force-static';
-export const revalidate = false;
-
-export async function GET() {
+async function generateStaticContent() {
+  console.log('Generating static content for GitHub Pages...');
+  
   try {
-    const readmePath = join(process.cwd(), 'README.md');
-    const readmeContent = await readFile(readmePath, 'utf-8');
+    // Create public/api directory
+    const apiDir = path.join(process.cwd(), 'public', 'api');
+    await fs.promises.mkdir(apiDir, { recursive: true });
+    
+    // Generate README content
+    const readmePath = path.join(process.cwd(), 'README.md');
+    const readmeContent = await fs.promises.readFile(readmePath, 'utf-8');
     
     // Simple markdown to HTML conversion for basic elements
     let htmlContent = readmeContent
@@ -48,9 +50,24 @@ export async function GET() {
       })
       .join('\n');
 
-    return NextResponse.json({ content: htmlContent });
+    // Write static README JSON
+    const readmeData = { content: htmlContent };
+    await fs.promises.writeFile(
+      path.join(apiDir, 'readme.json'),
+      JSON.stringify(readmeData, null, 2)
+    );
+    
+    console.log('✓ Generated static README content');
+    
   } catch (error) {
-    console.error('Error reading README:', error);
-    return NextResponse.json({ error: 'Failed to read README' }, { status: 500 });
+    console.error('Error generating static content:', error);
+    process.exit(1);
   }
-} 
+}
+
+// Run if called directly
+if (require.main === module) {
+  generateStaticContent();
+}
+
+module.exports = { generateStaticContent }; 

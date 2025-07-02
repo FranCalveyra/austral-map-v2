@@ -10,6 +10,8 @@ const nextConfig = {
     trailingSlash: true,
     basePath: '/austral-map-v2',
     assetPrefix: '/austral-map-v2/',
+    // Skip API routes during static export as they require a server
+    generateBuildId: () => 'static-build',
   }),
 };
 

@@ -4,6 +4,10 @@ import { spawn } from 'child_process';
 import { join } from 'path';
 import { promises as fs } from 'fs';
 
+// Required for static export
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const data = await request.formData();

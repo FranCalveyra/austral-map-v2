@@ -29,6 +29,9 @@ jobs:
           pip install -r requirements.txt
       - name: Install Node.js dependencies
         run: npm ci
+      - name: Generate static content
+        run: node scripts/generate-static-content.js
+
       - name: Build
         run: |
           npm run build
