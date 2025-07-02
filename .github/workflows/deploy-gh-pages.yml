@@ -35,6 +35,7 @@ jobs:
           touch out/.nojekyll
         env:
           NODE_ENV: production
+          STATIC_EXPORT: true
       - name: Configure Git User
         run: |
           git config --global user.name "${{ github.actor }}"

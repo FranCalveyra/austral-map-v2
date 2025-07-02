@@ -4,8 +4,8 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: { unoptimized: true },
-  // Only use static export in CI/CD environment for GitHub Pages
-  ...(process.env.GITHUB_ACTIONS && {
+  // Only use static export when explicitly set for GitHub Pages deployment
+  ...(process.env.STATIC_EXPORT === 'true' && {
     output: 'export',
     trailingSlash: true,
     basePath: '/austral-map-v2',
