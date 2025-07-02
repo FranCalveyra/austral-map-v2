@@ -13,6 +13,8 @@ Permite a los estudiantes cargar su plan de estudios y seguir su avance de maner
 ## Estado Actual del Proyecto
 
 Por ahora, este proyecto funciona específicamente para el **plan de Ingeniería Informática de 2023** de la Universidad Austral. Sin embargo, tengo planeado expandirlo en el futuro para incluir todos los planes de la Facultad de Ingeniería: **Ingeniería Industrial**, **Ingeniería Biomédica**, y planes anteriores de las tres ingenierías.
+
+Sumado a esto, actualmente no se pueden incluir las electivas dado el formato del excel del plan, pero planeo incluirlas a futuro por mi cuenta :).
 <br/>
 
 ## Características Principales

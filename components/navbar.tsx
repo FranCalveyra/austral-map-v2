@@ -97,9 +97,9 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Left side - Logo, title and upload */}
-          <div className="flex items-center space-x-4">
-            <img src="/assets/austral-logo.png" alt="Austral University" className="h-12 w-12" />
-            <div>
+                      <div className="flex items-center space-x-4">
+              <img src="/assets/austral-logo.svg" alt="Universidad Austral" className="h-12 w-12 brightness-0 invert" />
+              <div>
               <h1 className="text-xl font-bold text-white">
                 Plan de Estudios
               </h1>
@@ -128,9 +128,9 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
           </div>
 
           {/* Center - Subject info and controls */}
-          <div className="flex items-center space-x-6 flex-1 justify-center">
+                      <div className="flex items-center space-x-6 flex-1 justify-center px-16 pr-24">
             {selectedSubject ? (
-              <div className="bg-blue-900 px-4 py-2 rounded-lg border border-blue-700 flex items-center justify-between flex-wrap">
+              <div className="bg-blue-900 px-8 py-2 rounded-lg border border-blue-700 flex items-center justify-between flex-wrap">
                                   <div className="flex items-center space-x-4 min-w-max">
                     <BookOpen className="h-5 w-5 text-blue-300" />
                     <div>

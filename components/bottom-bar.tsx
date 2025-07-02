@@ -52,14 +52,14 @@ export function BottomBar({
           </button>
           
           {/* Electives toggle */}
-          <button 
+          {/* <button 
             onClick={onToggleElectives} 
             className={`flex items-center px-3 py-2 rounded-md text-sm font-medium border transition-colors
               ${showElectives ? 'bg-gray-600 border-gray-500 text-white' : 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700'}`}
           > 
             <Layers className="w-4 h-4 mr-2" />
             Electivas
-          </button>
+          </button> */}
           
           {/* Ingress Course toggle */}
           <button 
