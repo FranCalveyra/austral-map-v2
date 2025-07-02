@@ -1,0 +1,5 @@
+/node_modules
+/.next/
+/temp/
+**/DS_Store
+**/plan_estudios*
