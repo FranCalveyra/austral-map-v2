@@ -4,7 +4,7 @@ import { spawn } from 'child_process';
 import { join } from 'path';
 import { promises as fs } from 'fs';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const data = await request.formData();
     const file: File | null = data.get('file') as unknown as File;
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // Execute Python script
     const pythonScript = join(process.cwd(), 'parse_plan_estudios.py');
     
-    return new Promise((resolve) => {
+    return new Promise<NextResponse>((resolve) => {
       const python = spawn('python3', [pythonScript, tempFilePath, '-o', outputFilePath]);
       
       let stdout = '';
