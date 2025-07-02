@@ -110,7 +110,7 @@ export default function Home() {
   const approvedCount = planApproved + ingressApproved;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#21262d' }}>
       <Navbar
         selectedSubject={selectedSubject}
         nodes={nodes}

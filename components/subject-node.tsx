@@ -57,23 +57,23 @@ export function SubjectNodeComponent({
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
   const getNodeColor = () => {
-    if (isSelected) return 'bg-blue-500 border-blue-600 text-white shadow-blue-200';
+    if (isSelected) return 'bg-blue-500 border-blue-600 text-white';
     
     switch (subject.status) {
       case 'APROBADA':
-        return 'bg-green-500 border-green-600 text-white shadow-green-200';
+        return 'bg-green-500 border-green-600 text-white';
       case 'CURSANDO':
-        return 'bg-blue-400 border-blue-500 text-white shadow-blue-200';
+        return 'bg-blue-400 border-blue-500 text-white';
       case 'EN_FINAL':
-        return 'bg-yellow-500 border-yellow-600 text-white shadow-yellow-200';
+        return 'bg-yellow-500 border-yellow-600 text-white';
       case 'DESAPROBADA':
-        return 'bg-white border-gray-300 text-gray-800';
+        return 'bg-gray-700 border-gray-500 text-gray-100';
       case 'DISPONIBLE':
-        return 'bg-white border-gray-300 text-gray-800 hover:border-blue-400 hover:shadow-blue-100';
+        return 'bg-gray-700 border-gray-500 text-gray-100 hover:border-blue-400';
       case 'NO_DISPONIBLE':
-        return 'bg-gray-200 border-gray-400 text-gray-600';
+        return 'bg-gray-800 border-gray-600 text-gray-400';
       default:
-        return 'bg-white border-gray-300 text-gray-800';
+        return 'bg-gray-700 border-gray-500 text-gray-100';
     }
   };
 
@@ -121,12 +121,12 @@ export function SubjectNodeComponent({
   return (
     <div
       className={cn(
-        'absolute select-none cursor-move rounded-2xl border-2 p-3 shadow-lg transition-all duration-200 flex flex-col items-center justify-center',
+        'absolute select-none cursor-move rounded-2xl border-2 p-3 transition-all duration-200 flex flex-col items-center justify-center',
         widthClass,
         NODE_HEIGHT_CLASS,
         getNodeColor(),
         getOpacity(),
-        isDragging && 'shadow-2xl scale-105 z-50 cursor-ns-resize',
+        isDragging && 'scale-105 z-50 cursor-ns-resize',
         isAnnual && 'border-4 border-dashed' // Visual indicator for annual subjects
       )}
       style={{

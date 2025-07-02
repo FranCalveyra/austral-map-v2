@@ -78,5 +78,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-color: #21262d !important;
+  }
+  html {
+    background-color: #21262d !important;
   }
 }

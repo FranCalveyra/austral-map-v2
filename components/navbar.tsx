@@ -93,17 +93,17 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
     }
   };
   return (
-    <nav className="w-full bg-white border-b border-gray-200 shadow-sm">
+    <nav className="w-full border-b border-gray-700 shadow-sm" style={{ backgroundColor: '#21262d' }}>
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Left side - Logo, title and upload */}
           <div className="flex items-center space-x-4">
             <img src="/assets/austral-logo.png" alt="Austral University" className="h-12 w-12" />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-white">
                 Plan de Estudios
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-300">
                 {studentName ? `Estudiante: ${studentName}` : 'Visualizador de Plan de Estudios'}
               </p>
             </div>
@@ -130,17 +130,17 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
           {/* Center - Subject info and controls */}
           <div className="flex items-center space-x-6 flex-1 justify-center">
             {selectedSubject ? (
-              <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200 flex items-center justify-between flex-wrap">
-                <div className="flex items-center space-x-4 min-w-max">
-                  <BookOpen className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <h3 className="font-semibold text-blue-900">
-                      {selectedSubject.Course}
-                    </h3>
-                    <div className="flex items-center space-x-4 text-sm text-blue-700">
+              <div className="bg-blue-900 px-4 py-2 rounded-lg border border-blue-700 flex items-center justify-between flex-wrap">
+                                  <div className="flex items-center space-x-4 min-w-max">
+                    <BookOpen className="h-5 w-5 text-blue-300" />
+                    <div>
+                      <h3 className="font-semibold text-white">
+                        {selectedSubject.Course}
+                      </h3>
+                      <div className="flex items-center space-x-4 text-sm text-blue-200">
                       <span className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {selectedSubject.Year === 0 ? 'Curso de Ingreso' : `Año ${selectedSubject.Year}${selectedSubject.Semester ? `, Semestre ${selectedSubject.Semester}` : ' (ANUAL)'}`}
+                        {selectedSubject.Year === 0 ? 'Curso de Ingreso' : `Año ${selectedSubject.Year}${selectedSubject.Semester ? `, Cuatrimestre ${selectedSubject.Semester}` : ' (ANUAL)'}`}
                       </span>
                       <span>ID: {selectedSubject.ID}</span>
                       <span>{selectedSubject.Credits} créditos</span>
@@ -150,7 +150,7 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
 
                 {/* Status controls */}
                 <div className="flex items-center space-x-2 ml-4 flex-shrink-0">
-                  <span className="text-sm font-medium text-blue-900">Estado:</span>
+                  <span className="text-sm font-medium text-white">Estado:</span>
                   <div className="flex space-x-1">
                     {statusOptions.map((status) => {
                       const isRestricted = (status === 'DISPONIBLE' || status === 'CURSANDO') && !canModifyProgress;
@@ -159,8 +159,8 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
                           key={status}
                           onClick={() => !isRestricted && onStatusChange(selectedSubject.ID, status)}
                           disabled={isRestricted}
-                          className={`px-3 py-1 rounded-md text-xs font-medium border transition-all duration-200
-                            ${selectedSubject.status === status ? getStatusColor(status) : 'text-gray-500 bg-white border-gray-200 hover:bg-gray-50'}
+                                                      className={`px-3 py-1 rounded-md text-xs font-medium border transition-all duration-200
+                            ${selectedSubject.status === status ? getStatusColor(status) : 'text-gray-300 bg-gray-800 border-gray-600 hover:bg-gray-700'}
                             ${isRestricted ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                           <div className="flex items-center space-x-1">
@@ -174,7 +174,7 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
                   {/* Grade input when approved */}
                   {selectedSubject.status === 'APROBADA' && (
                     <div className="flex items-center space-x-2 ml-4">
-                      <span className="text-sm font-medium text-blue-900">Nota:</span>
+                      <span className="text-sm font-medium text-white">Nota:</span>
                       <input
                         type="number"
                         min={4}
@@ -182,14 +182,14 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
                         step={1}
                         value={selectedSubject.grade ?? ''}
                         onChange={(e) => onGradeChange(selectedSubject.ID, Number(e.target.value))}
-                        className="w-16 px-2 py-1 border rounded text-sm"
+                        className="w-16 px-2 py-1 border border-gray-600 bg-gray-800 text-white rounded text-sm"
                       />
                     </div>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="text-gray-500 text-sm">
+              <div className="text-gray-300 text-sm">
                 Selecciona una materia para ver detalles y cambiar estado
               </div>
             )}
@@ -198,13 +198,13 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
           {/* Right side - Contact Info */}
           <div className="flex items-center space-x-4 flex-shrink-0">
             <div className="text-right">
-              <div className="text-sm font-medium text-gray-900">Desarrollado por FranCalveyra</div>
+              <div className="text-sm font-medium text-white">Desarrollado por FranCalveyra</div>
               <div className="flex items-center space-x-3 mt-1">
                 <a
                   href="https://github.com/FranCalveyra"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center text-xs text-gray-600 hover:text-gray-900 transition-colors"
+                  className="flex items-center text-xs text-gray-300 hover:text-white transition-colors"
                 >
                   <Github className="w-4 h-4 mr-1" />
                   GitHub
@@ -213,14 +213,14 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
                   href="https://www.linkedin.com/in/francisco-calveyra/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center text-xs text-gray-600 hover:text-blue-600 transition-colors"
+                  className="flex items-center text-xs text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   <Linkedin className="w-4 h-4 mr-1" />
                   LinkedIn
                 </a>
                 <a
                   href="mailto:franciscocalveyra24@gmail.com"
-                  className="flex items-center text-xs text-gray-600 hover:text-red-600 transition-colors"
+                  className="flex items-center text-xs text-gray-300 hover:text-red-400 transition-colors"
                 >
                   <Mail className="w-4 h-4 mr-1" />
                   Email

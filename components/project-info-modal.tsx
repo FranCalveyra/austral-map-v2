@@ -22,7 +22,7 @@ export function ProjectInfoModal({ isOpen, onClose }: ProjectInfoModalProps) {
         })
         .catch(err => {
           console.error('Error loading README:', err);
-          setContent('<p class="text-red-600">Error al cargar la información del proyecto.</p>');
+          setContent('<p class="text-red-400">Error al cargar la información del proyecto.</p>');
           setLoading(false);
         });
     }
@@ -32,12 +32,12 @@ export function ProjectInfoModal({ isOpen, onClose }: ProjectInfoModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Acerca del Proyecto</h2>
+      <div className="rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto" style={{ backgroundColor: '#21262d' }}>
+        <div className="flex items-center justify-between p-6 border-b border-gray-600">
+          <h2 className="text-2xl font-bold text-white">Acerca del Proyecto</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-200 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
@@ -46,18 +46,18 @@ export function ProjectInfoModal({ isOpen, onClose }: ProjectInfoModalProps) {
         <div className="p-6">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Cargando información...</span>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+              <span className="ml-3 text-gray-300">Cargando información...</span>
             </div>
           ) : (
             <div 
-              className="prose prose-gray max-w-none"
+              className="prose prose-invert max-w-none"
               dangerouslySetInnerHTML={{ __html: content }}
             />
           )}
         </div>
         
-        <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <div className="px-6 py-4 border-t border-gray-600" style={{ backgroundColor: '#1a1f26' }}>
           <button
             onClick={onClose}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
