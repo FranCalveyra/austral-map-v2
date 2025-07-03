@@ -109,6 +109,13 @@ export default function Home() {
 
   const approvedCount = planApproved + ingressApproved;
 
+  // Calculate average grade from approved subjects with grades
+  const approvedSubjectsWithGrades = [...ingressNodes, ...planNodes]
+    .filter(node => node.status === 'APROBADA' && node.grade != null);
+  const averageGrade = approvedSubjectsWithGrades.length > 0 
+    ? approvedSubjectsWithGrades.reduce((sum, node) => sum + (node.grade || 0), 0) / approvedSubjectsWithGrades.length
+    : null;
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#21262d' }}>
       <Navbar
@@ -193,7 +200,8 @@ export default function Home() {
         progress={{
           ingress: { approved: ingressApproved, total: ingressNodes.length },
           plan: { approved: planApproved, total: planNodes.length },
-          electives: { hoursCompleted: electiveHoursCompleted, hoursNeeded: 384, subjectsCompleted: electiveApproved, subjectsNeeded: electiveSubjectsNeeded }
+          electives: { hoursCompleted: electiveHoursCompleted, hoursNeeded: 384, subjectsCompleted: electiveApproved, subjectsNeeded: electiveSubjectsNeeded },
+          averageGrade: averageGrade
         }}
         showLegend={showLegend}
         onToggleLegend={() => setShowLegend(prev => !prev)}

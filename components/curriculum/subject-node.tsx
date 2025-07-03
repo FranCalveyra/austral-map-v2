@@ -23,38 +23,54 @@ export function SubjectNodeComponent({
   isSelected
 }: SubjectNodeProps) {
   const [isDragging, setIsDragging] = React.useState(false);
-  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
+  const dragStartRef = React.useRef({ x: 0, y: 0 });
+  const dragOffsetRef = React.useRef({ x: 0, y: 0 });
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
     setIsDragging(true);
-    setDragStart({
+    
+    // Calculate offset from mouse position to node position
+    dragOffsetRef.current = {
       x: e.clientX - subject.x,
       y: e.clientY - subject.y
-    });
+    };
+    
+    // Immediately attach global event listeners
+    document.addEventListener('mousemove', handleMouseMove, { passive: false });
+    document.addEventListener('mouseup', handleMouseUp, { passive: false });
+    
+    // Prevent text selection during drag
+    document.body.style.userSelect = 'none';
   };
 
-  const handleMouseMove = React.useCallback((e: MouseEvent) => {
-    if (!isDragging) return;
+  const handleMouseMove = (e: MouseEvent) => {
+    e.preventDefault();
     
     // Only allow vertical movement - keep x position fixed
-    const newY = e.clientY - dragStart.y;
+    const newY = e.clientY - dragOffsetRef.current.y;
     onDrag(subject.ID, subject.x, newY);
-  }, [isDragging, dragStart, onDrag, subject.ID, subject.x]);
+  };
 
-  const handleMouseUp = React.useCallback(() => {
+  const handleMouseUp = () => {
     setIsDragging(false);
-  }, []);
+    
+    // Clean up event listeners
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+    
+    // Restore text selection
+    document.body.style.userSelect = '';
+  };
 
+  // Clean up on unmount
   React.useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+    };
+  }, []);
 
   const getNodeColor = () => {
     if (isSelected) return 'bg-blue-500 border-blue-600 text-white';
@@ -121,23 +137,34 @@ export function SubjectNodeComponent({
   return (
     <div
       className={cn(
-        'absolute select-none cursor-move rounded-2xl border-2 p-3 transition-all duration-200 flex flex-col items-center justify-center',
+        'absolute select-none cursor-move rounded-2xl border-2 p-3 transition-all duration-75 flex flex-col items-center justify-center',
         widthClass,
         NODE_HEIGHT_CLASS,
         getNodeColor(),
         getOpacity(),
-        isDragging && 'scale-105 z-50 cursor-ns-resize',
+        isDragging && 'scale-105 z-50 cursor-ns-resize shadow-lg',
         isAnnual && 'border-4 border-dashed' // Visual indicator for annual subjects
       )}
       style={{
         left: subject.x,
         top: subject.y,
         transform: isDragging ? 'rotate(1deg)' : 'rotate(0deg)',
-        zIndex: isDragging ? 50 : 10
+        zIndex: isDragging ? 50 : 10,
+        willChange: isDragging ? 'transform' : 'auto'
       }}
       onMouseDown={handleMouseDown}
-      onClick={(e) => { e.stopPropagation(); onClick(subject); }}
-      onDoubleClick={(e) => { e.stopPropagation(); onDoubleClick(subject); }}
+      onClick={(e) => { 
+        if (!isDragging) {
+          e.stopPropagation(); 
+          onClick(subject); 
+        }
+      }}
+      onDoubleClick={(e) => { 
+        if (!isDragging) {
+          e.stopPropagation(); 
+          onDoubleClick(subject); 
+        }
+      }}
     >
       <div className="text-sm font-semibold leading-tight text-center">
         {subject.Course}

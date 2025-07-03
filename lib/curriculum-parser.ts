@@ -27,7 +27,8 @@ export function calculateSubjectStatus(subject: SubjectNode, allNodes: SubjectNo
   // Check if all prerequisites are met
   const canTake = subject.prerequisites.every(prereq => {
     const prereqNode = allNodes.find(n => n.ID === prereq.id);
-    if (!prereqNode) return false;
+    // If prerequisite is not found in curriculum, assume it's met (like "1", "2", "3", etc.)
+    if (!prereqNode) return true;
     
     if (prereq.condition === 'Aprobada') {
       return prereqNode.status === 'APROBADA';
@@ -45,7 +46,8 @@ export function calculateAvailableStatus(subject: SubjectNode, allNodes: Subject
   // It doesn't preserve existing statuses
   const canTake = subject.prerequisites.every(prereq => {
     const prereqNode = allNodes.find(n => n.ID === prereq.id);
-    if (!prereqNode) return false;
+    // If prerequisite is not found in curriculum, assume it's met (like "1", "2", "3", etc.)
+    if (!prereqNode) return true;
     
     if (prereq.condition === 'Aprobada') {
       return prereqNode.status === 'APROBADA';
