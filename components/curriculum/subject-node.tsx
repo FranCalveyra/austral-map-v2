@@ -3,7 +3,7 @@
 import React from 'react';
 import { SubjectNode, SubjectStatus } from '@/types/curriculum';
 import { cn } from '@/lib/utils';
-import { NODE_WIDTH_CLASS, NODE_HEIGHT_CLASS } from './constants';
+import { NODE_WIDTH_CLASS, NODE_HEIGHT_CLASS } from '../constants';
 
 interface SubjectNodeProps {
   subject: SubjectNode;
@@ -146,6 +146,16 @@ export function SubjectNodeComponent({
       {subject.status === 'APROBADA' && subject.grade != null && (
         <div className="text-sm mt-1 font-bold">
           [{subject.grade}]
+        </div>
+      )}
+      {subject.status === 'EN_FINAL' && (
+        <div className="text-xs mt-1 font-medium opacity-90">
+          [EN FINAL]
+        </div>
+      )}
+      {subject.status === 'CURSANDO' && (
+        <div className="text-xs mt-1 font-medium opacity-90">
+          [EN CURSO]
         </div>
       )}
     </div>

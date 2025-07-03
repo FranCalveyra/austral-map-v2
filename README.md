@@ -42,7 +42,6 @@ Sumado a esto, actualmente no se pueden incluir las electivas dado el formato de
 <img src="https://skillicons.dev/icons?i=typescript" alt="TypeScript" />
 <img src="https://skillicons.dev/icons?i=react" alt="React" />
 <img src="https://skillicons.dev/icons?i=tailwindcss" alt="Tailwind CSS" />
-<img src="https://skillicons.dev/icons?i=python" alt="Python" />
 <img src="https://skillicons.dev/icons?i=nodejs" alt="Node.js" />
 
 <br/>

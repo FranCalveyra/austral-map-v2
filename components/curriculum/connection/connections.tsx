@@ -16,57 +16,8 @@ interface ConnectionsProps {
 export function Connections({ nodes, connections, selectedSubject }: ConnectionsProps) {
 
 
-  // Deduplicate multiple relations between the same nodes
-  const uniqueConnections = React.useMemo(() => {
-    const seen = new Set<string>();
-    return connections.filter(conn => {
-      const key = `${conn.from}-${conn.to}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [connections]);
-
-  // Remove transitive edges to only show direct prerequisite relations (transitive reduction)
-  const reducedConnections = React.useMemo(() => {
-    const adjMap = new Map<string, string[]>();
-    uniqueConnections.forEach(conn => {
-      const { from, to } = conn;
-      if (!adjMap.has(from)) adjMap.set(from, []);
-      adjMap.get(from)!.push(to);
-    });
-    const result: Connection[] = [];
-    uniqueConnections.forEach(conn => {
-      const { from, to } = conn;
-      // Temporarily remove this direct edge
-      const neighbors = adjMap.get(from) || [];
-      const filtered = neighbors.filter(n => n !== to);
-      adjMap.set(from, filtered);
-      // DFS to check indirect reachability
-      const stack = [...filtered];
-      const visited = new Set<string>();
-      let found = false;
-      while (stack.length && !found) {
-        const current = stack.pop()!;
-        if (current === to) {
-          found = true;
-          break;
-        }
-        if (!visited.has(current)) {
-          visited.add(current);
-          (adjMap.get(current) || []).forEach(n => {
-            if (!visited.has(n)) stack.push(n);
-          });
-        }
-      }
-      // Restore the direct edge
-      adjMap.set(from, neighbors);
-      if (!found) {
-        result.push(conn);
-      }
-    });
-    return result;
-  }, [uniqueConnections]);
+  // Connections are already reduced (deduplicated and transitive edges removed) from CurriculumGraph
+  const reducedConnections = connections;
 
   const getNodePosition = (nodeId: string) => {
     const node = nodes.find(n => n.ID === nodeId);

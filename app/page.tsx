@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { CurriculumSchema } from '@/lib/models/curriculum';
 import planData from '@/docs/plan.json';
 import { Subject, SubjectNode, SubjectStatus } from '@/types/curriculum';
-import { CurriculumGraph } from '@/components/curriculum-graph';
-import { Navbar } from '@/components/navbar';
-import { BottomBar } from '@/components/bottom-bar';
-import { ProjectInfoModal } from '@/components/project-info-modal';
+import { CurriculumGraph } from '@/components/curriculum/curriculum-graph';
+import { Navbar } from '@/components/navigation/navbar';
+import { BottomBar } from '@/components/ui-custom/bottom-bar';
+import { ProjectInfoModal } from '@/components/ui-custom/project-info-modal';
 import { calculateSubjectStatus, calculateLayout } from '@/lib/curriculum-parser';
 
 export default function Home() {

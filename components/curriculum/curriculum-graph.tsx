@@ -4,8 +4,9 @@ import React, { useCallback } from 'react';
 import { SubjectNode, Connection, SubjectStatus } from '@/types/curriculum';
 import { getConnections } from '@/lib/curriculum-parser';
 import { SubjectNodeComponent } from './subject-node';
-import { Connections } from './connections';
-import { NODE_WIDTH_CLASS, NODE_HEIGHT_CLASS } from './constants';
+import { Connections } from './connection/connections';
+import { Legend } from './legend/legend';
+import { NODE_WIDTH_CLASS, NODE_HEIGHT_CLASS } from '../constants';
 
 
 interface CurriculumGraphProps {
@@ -48,6 +49,60 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
   const connections = React.useMemo(() => {
     return getConnections(coreNodes);
   }, [coreNodes]);
+
+  // Calculate reduced connections (same logic as in Connections component)
+  const reducedConnections = React.useMemo(() => {
+    // First deduplicate multiple relations between the same nodes
+    const seen = new Set<string>();
+    const uniqueConnections = connections.filter(conn => {
+      const key = `${conn.from}-${conn.to}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    // Remove transitive edges to only show direct prerequisite relations
+    const adjMap = new Map<string, string[]>();
+    uniqueConnections.forEach(conn => {
+      const { from, to } = conn;
+      if (!adjMap.has(from)) adjMap.set(from, []);
+      adjMap.get(from)!.push(to);
+    });
+    
+    const result: Connection[] = [];
+    uniqueConnections.forEach(conn => {
+      const { from, to } = conn;
+      // Temporarily remove this direct edge
+      const neighbors = adjMap.get(from) || [];
+      const filtered = neighbors.filter(n => n !== to);
+      adjMap.set(from, filtered);
+      
+      // DFS to check indirect reachability
+      const stack = [...filtered];
+      const visited = new Set<string>();
+      let found = false;
+      while (stack.length && !found) {
+        const current = stack.pop()!;
+        if (current === to) {
+          found = true;
+          break;
+        }
+        if (!visited.has(current)) {
+          visited.add(current);
+          (adjMap.get(current) || []).forEach(n => {
+            if (!visited.has(n)) stack.push(n);
+          });
+        }
+      }
+      
+      // Restore the direct edge
+      adjMap.set(from, neighbors);
+      if (!found) {
+        result.push(conn);
+      }
+    });
+    return result;
+  }, [connections]);
 
   // Background click clears selection
   const handleBackgroundClick = useCallback((e: React.MouseEvent) => {
@@ -114,18 +169,18 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
     onStatusChange(subject.ID, subject.status === 'APROBADA' ? 'DISPONIBLE' : 'APROBADA');
   }, [onStatusChange]);
 
-  // Determine which nodes to dim: non-selected and non-connected
+  // Determine which nodes to dim: non-selected and non-connected (using reduced connections for direct relations only)
   const connectedIds = React.useMemo(() => {
     const set = new Set<string>();
     if (selectedSubject) {
       set.add(selectedSubject.ID);
-      connections.forEach(conn => {
+      reducedConnections.forEach(conn => {
         if (conn.from === selectedSubject.ID) set.add(conn.to);
         if (conn.to === selectedSubject.ID) set.add(conn.from);
       });
     }
     return set;
-  }, [selectedSubject, connections]);
+  }, [selectedSubject, reducedConnections]);
 
   // Get unique semesters for column headers based on core nodes (exclude annual subjects)
   const semesters = Array.from(new Set(
@@ -212,7 +267,7 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
       </div>
       
       {/* Connections */}
-      <Connections nodes={coreNodes} connections={connections} selectedSubject={selectedSubject} />
+      <Connections nodes={coreNodes} connections={reducedConnections} selectedSubject={selectedSubject} />
       
       {/* Subject nodes */}
       {coreNodes.map(subject => {
@@ -241,84 +296,7 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
       </div>
       
       {/* Legend - Fixed position */}
-      {showLegend && (
-        <div className="fixed bottom-20 left-4 p-4 rounded-lg shadow-lg border border-gray-600 z-40 max-w-sm" style={{ backgroundColor: '#21262d' }}>
-          <h3 className="font-semibold text-sm mb-3 text-white">Leyenda</h3>
-          
-          {/* Connection Colors */}
-          <div className="space-y-2 text-xs mb-4">
-            <h4 className="font-medium text-gray-300 mb-2">Estados de Correlatividades:</h4>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-1 bg-green-500 relative">
-                <div className="absolute right-0 top-0 w-0 h-0 border-l-[4px] border-l-green-500 border-t-[2px] border-t-transparent border-b-[2px] border-b-transparent"></div>
-              </div>
-                             <span className="text-gray-300">Materia Aprobada</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-6 h-1 bg-blue-500 relative">
-                 <div className="absolute right-0 top-0 w-0 h-0 border-l-[4px] border-l-blue-500 border-t-[2px] border-t-transparent border-b-[2px] border-b-transparent"></div>
-               </div>
-               <span className="text-gray-300">Materia Cursando</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-6 h-1 bg-yellow-500 relative">
-                 <div className="absolute right-0 top-0 w-0 h-0 border-l-[4px] border-l-yellow-500 border-t-[2px] border-t-transparent border-b-[2px] border-b-transparent"></div>
-               </div>
-               <span className="text-gray-300">Materia En Final</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-6 h-1 bg-red-500 relative">
-                 <div className="absolute right-0 top-0 w-0 h-0 border-l-[4px] border-l-red-500 border-t-[2px] border-t-transparent border-b-[2px] border-b-transparent"></div>
-               </div>
-               <span className="text-gray-300">Materia Desaprobada</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-6 h-1 bg-gray-400 relative">
-                 <div className="absolute right-0 top-0 w-0 h-0 border-l-[4px] border-l-gray-400 border-t-[2px] border-t-transparent border-b-[2px] border-b-transparent"></div>
-               </div>
-               <span className="text-gray-300">Sin Estado/Disponible</span>
-            </div>
-          </div>
-
-          {/* Subject Colors */}
-                     <div className="space-y-2 text-xs mb-4">
-             <h4 className="font-medium text-gray-300 mb-2">Estados de Materias:</h4>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-                             <span className="text-gray-300">Aprobada</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></div>
-               <span className="text-gray-300">Cursando</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-4 h-4 bg-yellow-100 border border-yellow-300 rounded"></div>
-               <span className="text-gray-300">En Final</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
-               <span className="text-gray-300">Desaprobada</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-4 h-4 bg-gray-700 border border-gray-500 rounded"></div>
-               <span className="text-gray-300">Disponible</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-4 h-4 bg-gray-800 border border-gray-600 rounded"></div>
-               <span className="text-gray-300">No Disponible</span>
-            </div>
-          </div>
-
-          {/* Instructions */}
-                     <div className="pt-2 border-t border-gray-600 text-xs text-gray-300">
-            <p>• <strong>Click:</strong> seleccionar materia</p>
-            <p>• <strong>Doble click:</strong> aprobar/desaprobar</p>
-            <p>• <strong>Arrastrar materia:</strong> mover verticalmente</p>
-            <p>• <strong>Rueda/trackpad:</strong> zoom (sin materia seleccionada)</p>
-            <p>• <strong>Arrastrar fondo:</strong> desplazar vista (sin materia seleccionada)</p>
-          </div>
-        </div>
-      )}
+      <Legend showLegend={showLegend} />
     </div>
   );
 }
