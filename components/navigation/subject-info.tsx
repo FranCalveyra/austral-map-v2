@@ -117,14 +117,14 @@ export function SubjectInfo({ selectedSubject, nodes, onStatusChange, onGradeCha
   }
 
   return (
-    <div className="bg-blue-900 px-8 py-2 rounded-lg border border-blue-700 flex items-center justify-between flex-wrap">
-      <div className="flex items-center space-x-4 min-w-max">
+    <div className="bg-blue-900 px-4 py-2 rounded-lg border border-blue-700 flex flex-col md:flex-row md:items-center md:justify-between flex-wrap">
+      <div className="flex items-center space-x-4 min-w-0 md:min-w-max">
         <BookOpen className="h-5 w-5 text-blue-300" />
         <div>
           <h3 className="font-semibold text-white">
             {selectedSubject.Course}
           </h3>
-          <div className="flex items-center space-x-4 text-sm text-blue-200">
+          <div className="flex flex-col md:flex-row items-start md:items-center space-y-1 md:space-y-0 md:space-x-4 text-sm text-blue-200">
             <span className="flex items-center">
               <Calendar className="h-4 w-4 mr-1" />
               {selectedSubject.Year === 0 ? 'Curso de Ingreso' : `Año ${selectedSubject.Year}${selectedSubject.Semester ? `, Cuatrimestre ${selectedSubject.Semester}` : ' (ANUAL)'}`}
@@ -136,9 +136,9 @@ export function SubjectInfo({ selectedSubject, nodes, onStatusChange, onGradeCha
       </div>
 
       {/* Status controls */}
-      <div className="flex items-center space-x-2 ml-4 flex-shrink-0">
+      <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-2 ml-0 md:ml-4 flex-shrink-0">
         <span className="text-sm font-medium text-white">Estado:</span>
-        <div className="flex space-x-1">
+        <div className="flex flex-col md:flex-row space-y-1 md:space-y-0 md:space-x-1">
           {statusOptions.map((status) => {
             let isDisabled = false;
             let disabledReason = '';

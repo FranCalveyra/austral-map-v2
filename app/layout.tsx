@@ -7,6 +7,7 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Austral Map',
   description: 'Mapa del plan de estudios de la Universidad Austral',
+  viewport: 'width=device-width, initial-scale=1',
   icons: {
     icon: '/assets/favicon.ico',
   },

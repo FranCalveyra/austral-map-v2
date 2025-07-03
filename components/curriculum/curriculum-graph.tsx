@@ -145,7 +145,29 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
     setIsPanning(false);
   }, []);
 
+  // Handle touch events for panning on mobile
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!selectedSubject) {
+      setIsPanning(true);
+      setLastPanPoint({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    }
+  }, [selectedSubject]);
 
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (isPanning) {
+      const deltaX = e.touches[0].clientX - lastPanPoint.x;
+      const deltaY = e.touches[0].clientY - lastPanPoint.y;
+      setPanOffset(prev => ({
+        x: prev.x + deltaX,
+        y: prev.y + deltaY
+      }));
+      setLastPanPoint({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    }
+  }, [isPanning, lastPanPoint]);
+
+  const handleTouchEnd = useCallback(() => {
+    setIsPanning(false);
+  }, []);
 
   // Set up global mouse event listeners
   React.useEffect(() => {
@@ -198,11 +220,14 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full overflow-hidden"
+      className="relative w-full h-full overflow-hidden touch-none"
       style={{ backgroundColor: '#21262d', cursor: isPanning ? 'grabbing' : (selectedSubject ? 'default' : 'grab') }}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onClick={handleBackgroundClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <div
         className="w-full h-full"

@@ -6,8 +6,8 @@ import planData from '@/docs/plan.json';
 import { Subject, SubjectNode, SubjectStatus } from '@/types/curriculum';
 import { CurriculumGraph } from '@/components/curriculum/curriculum-graph';
 import { Navbar } from '@/components/navigation/navbar';
-import { BottomBar } from '@/components/ui-custom/bottom-bar';
-import { ProjectInfoModal } from '@/components/ui-custom/project-info-modal';
+import { BottomBar } from '@/components/bottom-bar/bottom-bar';
+import { ProjectInfoModal } from '@/components/modals/project-info-modal';
 import { calculateSubjectStatus, calculateLayout } from '@/lib/curriculum-parser';
 
 export default function Home() {
@@ -117,7 +117,7 @@ export default function Home() {
     : null;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#21262d' }}>
+    <div className="h-screen flex flex-col bg-[#21262d]">
       <Navbar
         selectedSubject={selectedSubject}
         nodes={nodes}
@@ -154,7 +154,7 @@ export default function Home() {
         </div>
       )}
 
-      <main className="h-[calc(100vh-8rem)] pb-16">
+      <main className="flex-1 overflow-auto pb-16">
         <CurriculumGraph
           nodes={nodes}
           selectedSubject={selectedSubject}

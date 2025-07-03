@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Info, Layers, GraduationCap, HelpCircle } from 'lucide-react';
+import { Info, GraduationCap, HelpCircle } from 'lucide-react';
 
 interface ProgressData {
   ingress: { approved: number; total: number };
@@ -38,10 +38,10 @@ export function BottomBar({
   const progressPercentage = totalSubjects > 0 ? (approvedSubjects / totalSubjects) * 100 : 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t border-gray-700 shadow-lg z-40" style={{ backgroundColor: '#21262d' }}>
-      <div className="flex items-center justify-between px-4 py-3">
+    <div className="fixed bottom-0 left-0 right-0 border-t border-gray-700 shadow-lg z-40 bg-[#21262d]">
+      <div className="flex flex-col md:flex-row flex-wrap justify-between p-4">
         {/* Left side - Toggles */}
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-col md:flex-row flex-wrap items-start md:items-center space-y-2 md:space-y-0 md:space-x-2">
           {/* Legend toggle */}
           <button
             onClick={onToggleLegend}
@@ -84,7 +84,7 @@ export function BottomBar({
         </div>
 
         {/* Right side - Progress */}
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col md:flex-row flex-wrap items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
           <div className="text-right">
             <div className="text-sm font-medium text-white">
               {progress.averageGrade && (
@@ -104,7 +104,7 @@ export function BottomBar({
           </div>
 
           <div className="flex flex-col items-center">
-            <div className="w-32 bg-gray-200 rounded-full h-3 mb-1">
+            <div className="w-full md:w-32 bg-gray-200 rounded-full h-3 mb-1">
               <div
                 className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
                 style={{ width: `${progressPercentage}%` }}

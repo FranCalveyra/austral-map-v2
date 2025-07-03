@@ -7,6 +7,7 @@ import { TitleSection } from './title-section';
 import { UploadButton } from './upload-button';
 import { SubjectInfo } from './subject-info';
 import { DeveloperInfo } from './developer-info';
+import { Menu, X } from 'lucide-react';
 
 interface NavbarProps {
   selectedSubject: SubjectNode | null;
@@ -18,33 +19,75 @@ interface NavbarProps {
 }
 
 export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, onFileUpload, studentName }: NavbarProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
   return (
-    <nav className="w-full border-b border-gray-700 shadow-sm" style={{ backgroundColor: '#21262d' }}>
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Left side - Logo, title and upload */}
-          <div className="flex items-center space-x-4">
-            <Logo />
-            <TitleSection studentName={studentName} />
-            <UploadButton onFileUpload={onFileUpload} />
-          </div>
-
-          {/* Center - Subject info and controls */}
-          <div className="flex items-center space-x-6 flex-1 justify-center px-16 pr-24">
-            <SubjectInfo 
-              selectedSubject={selectedSubject}
-              nodes={nodes}
-              onStatusChange={onStatusChange}
-              onGradeChange={onGradeChange}
-            />
-          </div>
-
-          {/* Right side - Contact Info */}
-          <div className="flex items-center space-x-4 flex-shrink-0">
-            <DeveloperInfo />
-          </div>
+    <>
+      {/* Mobile Top Bar */}
+      <div className="md:hidden flex items-center justify-between px-4 py-2 bg-[#21262d]">
+        <Menu className="h-6 w-6 text-white" onClick={() => setIsOpen(true)} />
+        <div className="flex items-center space-x-2">
+          <Logo className="h-6 w-6" />
+          <TitleSection studentName={studentName} />
         </div>
       </div>
-    </nav>
+      {/* Desktop Nav */}
+      <nav className="hidden md:flex w-full border-b border-gray-700 shadow-sm overflow-x-auto" style={{ backgroundColor: '#21262d' }}>
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            {/* Left side - Logo, title and upload */}
+            <div className="flex items-center space-x-4">
+              <Logo />
+              <TitleSection studentName={studentName} />
+              <UploadButton onFileUpload={onFileUpload} />
+            </div>
+
+            {/* Center - Subject info and controls */}
+            <div className="flex items-center space-x-6 flex-1 justify-center px-16 pr-24">
+              <SubjectInfo 
+                selectedSubject={selectedSubject}
+                nodes={nodes}
+                onStatusChange={onStatusChange}
+                onGradeChange={onGradeChange}
+              />
+            </div>
+
+            {/* Right side - Contact Info */}
+            <div className="flex items-center space-x-4 flex-shrink-0">
+              <DeveloperInfo />
+            </div>
+          </div>
+        </div>
+      </nav>
+      {/* Mobile Sidebar */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          {/* Sidebar container */}
+          <div className="w-64 bg-[#21262d] p-4 flex flex-col">
+            {/* Close button */}
+            <div className="flex justify-end">
+              <X className="h-6 w-6 text-white" onClick={() => setIsOpen(false)} />
+            </div>
+            {/* Scrollable content */}
+            <div className="mt-4 flex-1 overflow-y-auto space-y-4">
+              <Logo />
+              <TitleSection studentName={studentName} />
+              <UploadButton onFileUpload={onFileUpload} />
+              <SubjectInfo
+                selectedSubject={selectedSubject}
+                nodes={nodes}
+                onStatusChange={onStatusChange}
+                onGradeChange={onGradeChange}
+              />
+            </div>
+            {/* Fixed footer */}
+            <div className="mt-4">
+              <DeveloperInfo />
+            </div>
+          </div>
+          {/* Overlay to close */}
+          <div className="flex-1" onClick={() => setIsOpen(false)} />
+        </div>
+      )}
+    </>
   );
 }
