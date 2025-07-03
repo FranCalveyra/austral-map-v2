@@ -2,10 +2,6 @@ import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
-// Required for static export
-export const dynamic = 'force-static';
-export const revalidate = false;
-
 export async function GET() {
   try {
     const readmePath = join(process.cwd(), 'README.md');

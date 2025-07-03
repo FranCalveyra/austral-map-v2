@@ -14,35 +14,17 @@ export function ProjectInfoModal({ isOpen, onClose }: ProjectInfoModalProps) {
 
   useEffect(() => {
     if (isOpen) {
-      // Try static file first (for GitHub Pages), fallback to API route
-      const fetchReadme = async () => {
-        try {
-          // Try static JSON file first (for GitHub Pages)
-          const staticResponse = await fetch('/api/readme.json');
-          if (staticResponse.ok) {
-            const data = await staticResponse.json();
-            setContent(data.content || '');
-            setLoading(false);
-            return;
-          }
-        } catch (staticError) {
-          console.log('Static file not found, trying API route...');
-        }
-
-        try {
-          // Fallback to API route (for local development)
-          const apiResponse = await fetch('/api/readme');
-          const data = await apiResponse.json();
+      fetch('/api/readme')
+        .then(res => res.json())
+        .then(data => {
           setContent(data.content || '');
           setLoading(false);
-        } catch (apiError) {
-          console.error('Error loading README:', apiError);
+        })
+        .catch(err => {
+          console.error('Error loading README:', err);
           setContent('<p class="text-red-400">Error al cargar la información del proyecto.</p>');
           setLoading(false);
-        }
-      };
-
-      fetchReadme();
+        });
     }
   }, [isOpen]);
 

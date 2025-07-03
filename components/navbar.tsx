@@ -92,13 +92,6 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
       onFileUpload(file);
     }
   };
-
-  // Detect if we're running on GitHub Pages (static export mode)
-  const isStaticMode = React.useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    return window.location.pathname.includes('/austral-map-v2') || 
-           window.location.hostname.includes('github.io');
-  }, []);
   return (
     <nav className="w-full border-b border-gray-700 shadow-sm" style={{ backgroundColor: '#21262d' }}>
       <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -115,32 +108,23 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
               </p>
             </div>
 
-            {/* Upload button or static mode message */}
-            {isStaticMode ? (
-              <div className="px-3 py-2 bg-gray-700 text-gray-300 rounded-md border border-gray-600">
-                <div className="flex items-center">
-                  <FileText className="w-4 h-4 mr-2" />
-                  <span className="text-sm">Modo Demo</span>
-                </div>
-              </div>
-            ) : (
-              <div className="relative">
-                <input
-                  type="file"
-                  accept=".xls,.xlsx"
-                  onChange={handleFileUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  id="file-upload"
-                />
-                <label
-                  htmlFor="file-upload"
-                  className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer transition-colors"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  <span className="text-sm font-medium">Subir plan de estudios</span>
-                </label>
-              </div>
-            )}
+            {/* Upload button */}
+            <div className="relative">
+              <input
+                type="file"
+                accept=".xls,.xlsx"
+                onChange={handleFileUpload}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                id="file-upload"
+              />
+              <label
+                htmlFor="file-upload"
+                className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer transition-colors"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                <span className="text-sm font-medium">Subir plan de estudios</span>
+              </label>
+            </div>
           </div>
 
           {/* Center - Subject info and controls */}
