@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Info, GraduationCap, HelpCircle } from 'lucide-react';
+import { Info, GraduationCap, HelpCircle, ChevronDown } from 'lucide-react';
 
 interface ProgressData {
   ingress: { approved: number; total: number };
@@ -20,6 +20,9 @@ interface BottomBarProps {
   onToggleIngressCourse: () => void;
   showProjectInfo: boolean;
   onToggleProjectInfo: () => void;
+  planOptions: string[];
+  selectedPlanName: string;
+  onPlanSelect: (planName: string) => void;
 }
 
 export function BottomBar({
@@ -31,7 +34,10 @@ export function BottomBar({
   showIngressCourse,
   onToggleIngressCourse,
   showProjectInfo,
-  onToggleProjectInfo
+  onToggleProjectInfo,
+  planOptions,
+  selectedPlanName,
+  onPlanSelect
 }: BottomBarProps) {
   const totalSubjects = progress.ingress.total + progress.plan.total;
   const approvedSubjects = progress.ingress.approved + progress.plan.approved;
@@ -40,6 +46,21 @@ export function BottomBar({
   return (
     <div className="fixed bottom-0 left-0 right-0 border-t border-gray-700 shadow-lg z-40 bg-[#21262d]">
       <div className="flex flex-col md:flex-row flex-wrap justify-between p-4">
+        {/* Selector de plan */}
+        <div className="mb-2 md:mb-0">
+          <div className="relative inline-block">
+            <select
+              value={selectedPlanName}
+              onChange={e => onPlanSelect(e.target.value)}
+              className="appearance-none bg-gray-800 text-white px-3 py-2 pr-8 rounded-md border border-gray-600"
+            >
+              {planOptions.map(name => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300" />
+          </div>
+        </div>
         {/* Left side - Toggles */}
         <div className="flex flex-col md:flex-row flex-wrap items-start md:items-center space-y-2 md:space-y-0 md:space-x-2">
           {/* Legend toggle */}

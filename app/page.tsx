@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CurriculumSchema } from '@/lib/models/curriculum';
-import planData from '@/docs/plan.json';
+import planCiencia from '@/docs/planes_json/Plan_Ciencia_de_Datos_2025.json';
+import planIndustrial from '@/docs/planes_json/Plan_Ing_Industrial_2025.json';
+import planInformatico from '@/docs/planes_json/Plan_Ing_Informática_2023.json';
 import { Subject, SubjectNode, SubjectStatus } from '@/types/curriculum';
 import { CurriculumGraph } from '@/components/curriculum/curriculum-graph';
 import { Navbar } from '@/components/navigation/navbar';
@@ -10,17 +12,34 @@ import { BottomBar } from '@/components/bottom-bar/bottom-bar';
 import { ProjectInfoModal } from '@/components/modals/project-info-modal';
 import { calculateSubjectStatus, calculateLayout } from '@/lib/curriculum-parser';
 
+// Array de planes disponibles
+const PLANS = [
+  { name: 'Licenciatura en Ciencia de Datos', curriculum: planCiencia },
+  { name: 'Ingeniería Industrial', curriculum: planIndustrial },
+  { name: 'Ingeniería Informática', curriculum: planInformatico },
+];
+
 export default function Home() {
-  // Handle both old format (array) and new format (object with courses)
-  const initialCourses = Array.isArray(planData) ? planData : (planData as any).courses || [];
-  const initialStudentName = Array.isArray(planData) ? undefined : (planData as any).student_name;
+  // Plan seleccionado (por defecto Ing Industrial)
+  const [selectedPlan, setSelectedPlan] = useState(PLANS[2]);
+  // Courses base a partir del plan seleccionado
+  const [curriculum, setCurriculum] = useState<Subject[]>(() => CurriculumSchema.parse(selectedPlan.curriculum));
+  const [nodes, setNodes] = useState<SubjectNode[]>(() => calculateLayout(curriculum));
+  // Al cambiar el plan, recalcular curriculum y nodos
+  useEffect(() => {
+    const newCurr = CurriculumSchema.parse(selectedPlan.curriculum as any);
+    setCurriculum(newCurr);
+    setNodes(calculateLayout(newCurr));
+    setSelectedSubject(null);
+  }, [selectedPlan]);
+
+  const initialStudentName = undefined;
 
   const [selectedSubject, setSelectedSubject] = useState<SubjectNode | null>(null);
-  const [curriculum, setCurriculum] = useState<Subject[]>(() => CurriculumSchema.parse(initialCourses));
-  const [nodes, setNodes] = useState<SubjectNode[]>(() => calculateLayout(CurriculumSchema.parse(initialCourses)));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string | undefined>(initialStudentName);
+
   const handleGradeChange = (subjectId: string, grade: number) => {
     setNodes(prev => prev.map(node => node.ID === subjectId ? { ...node, grade } : node));
     if (selectedSubject?.ID === subjectId) {
@@ -75,7 +94,7 @@ export default function Home() {
       }
 
       if (result.success && result.data) {
-                const newCurriculum = CurriculumSchema.parse(result.data);
+        const newCurriculum = CurriculumSchema.parse(result.data);
         setCurriculum(newCurriculum);
         const newNodes = calculateLayout(newCurriculum);
         setNodes(newNodes);
@@ -112,7 +131,7 @@ export default function Home() {
   // Calculate average grade from approved subjects with grades
   const approvedSubjectsWithGrades = [...ingressNodes, ...planNodes]
     .filter(node => node.status === 'APROBADA' && node.grade != null);
-  const averageGrade = approvedSubjectsWithGrades.length > 0 
+  const averageGrade = approvedSubjectsWithGrades.length > 0
     ? approvedSubjectsWithGrades.reduce((sum, node) => sum + (node.grade || 0), 0) / approvedSubjectsWithGrades.length
     : null;
 
@@ -211,6 +230,12 @@ export default function Home() {
         onToggleIngressCourse={() => setShowIngressCourse(prev => !prev)}
         showProjectInfo={showProjectInfo}
         onToggleProjectInfo={() => setShowProjectInfo(prev => !prev)}
+        planOptions={PLANS.map(p => p.name)}
+        selectedPlanName={selectedPlan.name}
+        onPlanSelect={planName => {
+          const plan = PLANS.find(p => p.name === planName);
+          if (plan) setSelectedPlan(plan);
+        }}
       />
 
       {/* Project Info Modal */}
