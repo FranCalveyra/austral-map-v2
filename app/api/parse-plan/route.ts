@@ -3,10 +3,17 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import * as XLSX from 'xlsx';
 
+const PLAN_FILES: { [key: string]: string } = {
+  'Ingeniería Informática': 'Plan_Ing_Informática_2023.json',
+  'Ingeniería Industrial': 'Plan_Ing_Industrial_2025.json',
+  'Licenciatura en Ciencia de Datos': 'Plan_Ciencia_de_Datos_2025.json',
+};
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const data = await request.formData();
     const file: File | null = data.get('file') as unknown as File;
+    const planName: string | null = data.get('planName') as string;
 
     if (!file) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
@@ -169,54 +176,71 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       extractedCourses.push(courseData);
     }
 
+    const templateFileName = planName ? PLAN_FILES[planName] : null;
+
     // Load the template plan data (with all prerequisites intact)
-    const templatePlanPath = join(process.cwd(), 'docs', 'plan.json');
     let templateCourses = [];
-    try {
-      const templateData = await readFile(templatePlanPath, 'utf-8');
-      const templatePlan = JSON.parse(templateData);
-      // Handle both old format (array) and new format (object with courses)
-      templateCourses = Array.isArray(templatePlan) ? templatePlan : templatePlan.courses || [];
-    } catch (e) {
-      console.error('Could not load template plan data:', e);
-      throw new Error('Template plan.json not found or invalid');
+    if (templateFileName) {
+      try {
+        const templatePlanPath = join(process.cwd(), 'docs', 'planes_json', templateFileName);
+        const templateData = await readFile(templatePlanPath, 'utf-8');
+        templateCourses = JSON.parse(templateData);
+      } catch (e) {
+        console.error(`Could not load template plan for ${planName}:`, e);
+        // Continue without a template if the file is not found or invalid
+      }
     }
     
     // Use template as base and only update status/grades from Excel
-    const mergedCourses = templateCourses.map((templateCourse: any) => {
-      const uploadedCourse = extractedCourses.find((c: any) => c.ID === templateCourse.ID);
-      
-      if (uploadedCourse) {
-        // Course found in Excel - update status and grade, keep everything else from template
-        return {
-          ...templateCourse, // Keep all template data (including prerequisites)
-          status: uploadedCourse.status,
-          grade: uploadedCourse.grade
-        };
-      } else {
-        // Course not in Excel - keep template data but set status based on type
-        // Auto-approve ingress course subjects when Excel is uploaded
-        if (templateCourse.Year === 0) {
+    if (templateCourses.length > 0) {
+      const mergedCourses = templateCourses.map((templateCourse: any) => {
+        const uploadedCourse = extractedCourses.find((c: any) => c.ID === templateCourse.ID);
+        
+        // Electives are not in student Excel files, so we keep the template version
+        if (templateCourse.Year === 'Electives') {
+          return templateCourse;
+        }
+
+        if (uploadedCourse) {
+          // Course found in Excel - update status and grade, keep everything else from template
           return {
-            ...templateCourse,
-            status: 'APROBADA',
-            grade: 10 // Default good grade for ingress courses
+            ...templateCourse, // Keep all template data (including prerequisites)
+            status: uploadedCourse.status,
+            grade: uploadedCourse.grade
           };
         } else {
-          return {
-            ...templateCourse,
-            status: 'DISPONIBLE'
-          };
+          // Course not in Excel - keep template data but set status based on type
+          // Auto-approve ingress course subjects when Excel is uploaded
+          if (templateCourse.Year === 0) {
+            return {
+              ...templateCourse,
+              status: 'APROBADA',
+              grade: 10 // Default good grade for ingress courses
+            };
+          } else {
+            return {
+              ...templateCourse,
+              status: 'DISPONIBLE'
+            };
+          }
         }
-      }
-    });
-
-    return NextResponse.json({ 
-      success: true, 
-      data: mergedCourses,
-      studentName: studentName || undefined,
-      message: 'File processed successfully'
-    });
+      });
+      return NextResponse.json({ 
+        success: true, 
+        data: mergedCourses,
+        studentName: studentName || undefined,
+        message: 'File processed successfully'
+      });
+    } else {
+      // If no template is found (e.g., planName not provided or file missing),
+      // return only the extracted courses. This might lack prerequisite data.
+      return NextResponse.json({ 
+        success: true, 
+        data: extractedCourses,
+        studentName: studentName || undefined,
+        message: 'File processed without a curriculum template'
+      });
+    }
 
   } catch (error) {
     console.error('Upload error:', error);

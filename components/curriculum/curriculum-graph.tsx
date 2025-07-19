@@ -24,10 +24,13 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
   // Same layout constants as in parser
   const startX = 100;
   const columnWidth = 250;
+  const nodeHeight = 120;
   
   // Zoom and pan state
   const [zoom, setZoom] = React.useState(1);
   const [panOffset, setPanOffset] = React.useState({ x: 0, y: 0 });
+  // Loaded state for fade-in
+  const [loaded, setLoaded] = React.useState(false);
   const [isPanning, setIsPanning] = React.useState(false);
   const [lastPanPoint, setLastPanPoint] = React.useState({ x: 0, y: 0 });
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -35,16 +38,71 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
   // Filter nodes based on display settings
   const coreNodes = React.useMemo(() => {
     const filtered = nodes.filter(node => {
-      // Always exclude electives from main graph
-      if (node.isElective) return false;
-      
+      // Exclude electives from main graph unless toggled on
+      if (node.isElective && !showElectives) return false;
+
       // Filter ingress course (Year 0) based on toggle
       if (!showIngressCourse && node.Year === 0) return false;
-      
+
       return true;
     });
     return filtered;
-  }, [nodes, showIngressCourse]);
+  }, [nodes, showIngressCourse, showElectives]);
+
+  const electiveHeaderPosition = React.useMemo(() => {
+    if (!showElectives) return { visible: false, left: 0 };
+    
+    const electiveNodes = coreNodes.filter(node => node.isElective);
+    if (electiveNodes.length === 0) return { visible: false, left: 0 };
+
+    const planNodes = coreNodes.filter(node => !node.isElective && node.Year !== 0 && typeof node.Year === 'number');
+    const maxYear = planNodes.length > 0 ? Math.max(...planNodes.map(node => node.Year as number)) : 0;
+    
+    const electiveStartColumnIndex = 1 + maxYear * 2;
+    const numSlotsPerColumn = 6;
+    const numElectiveColumns = Math.ceil(electiveNodes.length / numSlotsPerColumn);
+    
+    const electiveBlockStartX = startX + electiveStartColumnIndex * columnWidth;
+    const electiveColumnsTotalWidth = (numElectiveColumns * columnWidth) - (columnWidth - 180); // Adjust for the last column not having a full gap
+    
+    const leftPosition = electiveBlockStartX + (electiveColumnsTotalWidth / 2) - (180 / 2);
+
+    return { visible: true, left: leftPosition };
+  }, [coreNodes, showElectives, startX, columnWidth]);
+
+  // Auto-fit view: compute zoom and panOffset to show all nodes
+  React.useLayoutEffect(() => {
+    if (!containerRef.current || coreNodes.length === 0) return;
+    const containerRect = containerRef.current.getBoundingClientRect();
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    coreNodes.forEach(node => {
+      // Determine node width: annual subjects are wider; electives and regular use standard width
+      const width = (node.Semester === null && !node.isElective) ? 430 : 180;
+      const height = nodeHeight;
+      minX = Math.min(minX, node.x);
+      maxX = Math.max(maxX, node.x + width);
+      minY = Math.min(minY, node.y);
+      maxY = Math.max(maxY, node.y + height);
+    });
+    const contentWidth = maxX - minX;
+    const contentHeight = maxY - minY;
+    // Add padding around content
+    const padding = 40;
+    const scaleX = containerRect.width / (contentWidth + padding * 2);
+    const scaleY = containerRect.height / (contentHeight + padding * 2);
+    const fitZoom = Math.min(scaleX, scaleY, 1);
+    setZoom(fitZoom);
+    // Center content
+    const offsetX = -minX * fitZoom + (containerRect.width - contentWidth * fitZoom) / 2;
+    const offsetY = -minY * fitZoom + (containerRect.height - contentHeight * fitZoom) / 2;
+    setPanOffset({ x: offsetX, y: offsetY });
+  }, [coreNodes]);
+
+  // Trigger fade-in after initial layout
+  React.useEffect(() => {
+    // Delay visibility until after auto-fit
+    setLoaded(true);
+  }, []);
   
   const connections = React.useMemo(() => {
     return getConnections(coreNodes);
@@ -234,7 +292,8 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
         style={{
           transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
           transformOrigin: '0 0',
-          transition: isPanning ? 'none' : 'transform 0.1s ease-out'
+          opacity: loaded ? 1 : 0,
+          transition: loaded ? 'opacity 0.5s ease' : 'none'
         }}
       >
       {/* Grid background */}
@@ -289,6 +348,19 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
             </div>
           );
         })}
+        {/* Electives header */}
+        {electiveHeaderPosition.visible && (
+          <div className="absolute" style={{ left: electiveHeaderPosition.left }}>
+            <div
+              className={`rounded-lg shadow-md border border-cyan-500 p-3 ${NODE_WIDTH_CLASS} ${NODE_HEIGHT_CLASS} flex items-center justify-center`}
+              style={{ backgroundColor: '#21262d' }}
+            >
+              <div className="font-semibold text-cyan-400 text-center">
+                Electivas
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Connections */}

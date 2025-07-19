@@ -1,7 +1,8 @@
 /node_modules
 /.next/
 /temp/
-**/DS_Store
+**/.DS_Store
 **/plan_estudios*
 out/
 .vercel
+.DS_Store

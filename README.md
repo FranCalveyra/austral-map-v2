@@ -12,9 +12,7 @@ Permite a los estudiantes cargar su plan de estudios y seguir su avance de maner
 
 ## Estado Actual del Proyecto
 
-Por ahora, este proyecto funciona específicamente para el **plan de Ingeniería Informática de 2023** de la Universidad Austral. Sin embargo, tengo planeado expandirlo en el futuro para incluir todos los planes de la Facultad de Ingeniería: **Ingeniería Industrial**, **Ingeniería Biomédica**, y planes anteriores de las tres ingenierías.
-
-Sumado a esto, actualmente no se pueden incluir las electivas dado el formato del excel del plan, pero planeo incluirlas a futuro por mi cuenta :).
+Actualmente, este proyecto soporta el **plan de Ingeniería Informática 2023**, el **plan de Licenciatura en Ciencia de Datos** y el **plan 2025 de Ingeniería Industrial** de la Universidad Austral. Próximamente planeo sumar el resto de los planes de la Facultad de Ingeniería, incluyendo **Ingeniería Biomédica** y planes anteriores.
 <br/>
 
 ## Características Principales
@@ -28,12 +26,12 @@ Sumado a esto, actualmente no se pueden incluir las electivas dado el formato de
 
 ## Cómo usar
 
-1. Ve al SIU, a la pestaña de Reportes > Plan de estudios, y descarga el Excel de tu plan.
-2. Carga tu plan de estudios en formato Excel usando el botón "Subir Plan"
-3. Navega por el mapa visual para ver tus materias organizadas por cuatrimestre
-4. Haz clic en una materia para ver sus detalles y correlatividades
-5. Usa los toggles en la parte inferior para mostrar/ocultar diferentes secciones
-6. Haz doble clic en una materia para aprobarla/desaprobarla manualmente
+1. Andá al SIU, a la pestaña de Reportes > Plan de estudios, y descargá el Excel de tu plan.
+2. Cargá tu plan de estudios en formato Excel usando el botón "Subir Plan"
+3. Navegá por el mapa visual para ver tus materias organizadas por cuatrimestre
+4. Hacé clic en una materia para ver sus detalles y correlatividades
+5. Usá los toggles en la parte inferior para mostrar/ocultar diferentes secciones
+6. Hacé doble clic en una materia para aprobarla/desaprobarla manualmente
 <br/>
 
 ## Tecnologías

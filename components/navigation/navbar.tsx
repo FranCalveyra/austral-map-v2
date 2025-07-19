@@ -6,8 +6,7 @@ import { Logo } from './logo';
 import { TitleSection } from './title-section';
 import { UploadButton } from './upload-button';
 import { SubjectInfo } from './subject-info';
-import { DeveloperInfo } from './developer-info';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 
 interface NavbarProps {
   selectedSubject: SubjectNode | null;
@@ -16,9 +15,12 @@ interface NavbarProps {
   onGradeChange: (subjectId: string, grade: number) => void;
   onFileUpload: (file: File) => void;
   studentName?: string;
+  planOptions: string[];
+  selectedPlanName: string;
+  onPlanSelect: (planName: string) => void;
 }
 
-export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, onFileUpload, studentName }: NavbarProps) {
+export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, onFileUpload, studentName, planOptions, selectedPlanName, onPlanSelect }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <>
@@ -53,7 +55,18 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
 
             {/* Right side - Contact Info */}
             <div className="flex items-center space-x-4 flex-shrink-0">
-              <DeveloperInfo />
+              <div className="relative inline-block">
+                <select
+                  value={selectedPlanName}
+                  onChange={e => onPlanSelect(e.target.value)}
+                  className="appearance-none bg-gray-800 text-white px-3 py-2 pr-8 rounded-md border border-gray-600"
+                >
+                  {planOptions.map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300" />
+              </div>
             </div>
           </div>
         </div>
@@ -78,11 +91,23 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
                 onStatusChange={onStatusChange}
                 onGradeChange={onGradeChange}
               />
+              {/* Plan selector */}
+              <div className="mt-4">
+                <div className="relative inline-block w-full">
+                  <select
+                    value={selectedPlanName}
+                    onChange={e => onPlanSelect(e.target.value)}
+                    className="appearance-none bg-gray-800 text-white px-3 py-2 pr-8 rounded-md border border-gray-600 w-full"
+                  >
+                    {planOptions.map(name => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300" />
+                </div>
+              </div>
             </div>
-            {/* Fixed footer */}
-            <div className="mt-4">
-              <DeveloperInfo />
-            </div>
+            {/* Fixed footer removed: DeveloperInfo moved to bottom bar */}
           </div>
           {/* Overlay to close */}
           <div className="flex-1" onClick={() => setIsOpen(false)} />

@@ -30,7 +30,7 @@
       "Prerequisites to Take":"(GICURMATEMATICA, Aprobada), (GICURFISICA, Aprobada)",
       "Prerequisites to Pass":"(GICURMATEMATICA, Aprobada), (GICURFISICA, Aprobada)",
       "Prerequisite to Take for":"(GIINDAM2, Regularizada), (GIINDFIS1, Regularizada), (GIINDAM3, Aprobada), (GIINFAM4, Aprobada), (GIINDEST1, Regularizada), (GIINDEST2, Aprobada)",
-      "Prerequisite to Pass for":"(GIINDAM2, Aprobada), (GIINDFIS1, Aprobada), (GIINDEST1, Aprobada)"
+      "Prerequisite to Pass for":"(GIINDAM2, Aprobada), (GIINDFIS1, Aprobada)"
     },
     {
       "Course":"\u00c1lgebra I",
@@ -304,7 +304,7 @@
       "Credits":"10.00",
       "Prerequisites to Take":"(GIINFAED, Regularizada), (GIINFIP2, Aprobada)",
       "Prerequisites to Pass":"(GIINFAED, Aprobada)",
-      "Prerequisite to Take for":"(GIINFL2, Regularizada)",
+      "Prerequisite to Take for":"(GIINFL2, Regularizada), (GIINFDWEB, Aprobada)",
       "Prerequisite to Pass for":"(GIINFL2, Aprobada)"
     },
     {
@@ -315,8 +315,8 @@
       "Credits":"10.00",
       "Prerequisites to Take":"(GIINFPR1, Aprobada)",
       "Prerequisites to Pass":"(GIINFLCD, Aprobada)",
-      "Prerequisite to Take for":"(GIINFSEGI, Regularizada)",
-      "Prerequisite to Pass for":"(GIINFSEGI, Aprobada)"
+      "Prerequisite to Take for":"(GIINFSEGI, Regularizada), (GIINFSEGR, Regularizada)",
+      "Prerequisite to Pass for":"(GIINFSEGI, Aprobada), (GIINFSEGR, Aprobada)"
     },
     {
       "Course":"Electr\u00f3nica Inform\u00e1tica",
@@ -348,7 +348,7 @@
       "Credits":"13.00",
       "Prerequisites to Take":"(GIINFADA, Regularizada), (GIINFBD, Regularizada), (GIINFAED, Aprobada)",
       "Prerequisites to Pass":"(GIINFADA, Aprobada), (GIINFBD, Aprobada)",
-      "Prerequisite to Take for":"(GIINFINGS, Regularizada), (GIINFL3, Regularizada), (GIINFASCS, Aprobada), (GIINFDDP, Aprobada)",
+      "Prerequisite to Take for":"(GIINFINGS, Regularizada), (GIINFL3, Regularizada), (GIINFASCS, Aprobada), (GIINFDDP, Aprobada), (GIINFANDAT, Aprobada)",
       "Prerequisite to Pass for":"(GIINFINGS, Aprobada), (GIINFL3, Aprobada)"
     },
     {
@@ -359,8 +359,8 @@
       "Credits":"15.00",
       "Prerequisites to Take":"(GIINFL1, Regularizada), (GIINFAED, Aprobada)",
       "Prerequisites to Pass":"(GIINFL1, Aprobada)",
-      "Prerequisite to Take for":null,
-      "Prerequisite to Pass for":null
+      "Prerequisite to Take for":"(GIINFDWEB, Regularizada)",
+      "Prerequisite to Pass for":"(GIINFDWEB, Aprobada)"
     },
     {
       "Course":"Ingenier\u00eda de Sistemas",
@@ -370,8 +370,8 @@
       "Credits":"13.00",
       "Prerequisites to Take":"(GIINFDS, Regularizada), (GIINFADA, Aprobada)",
       "Prerequisites to Pass":"(GIINFDS, Aprobada)",
-      "Prerequisite to Take for":"(GIINFASCS, Regularizada), (GIINFDDP, Regularizada), (GIINFL4, Aprobada)",
-      "Prerequisite to Pass for":"(GIINFASCS, Aprobada), (GIINFDDP, Aprobada)"
+      "Prerequisite to Take for":"(GIINFASCS, Regularizada), (GIINFDDP, Regularizada), (GIINFL4, Aprobada), (GIINFANDAT, Regularizada)",
+      "Prerequisite to Pass for":"(GIINFASCS, Aprobada), (GIINFDDP, Aprobada), (GIINFANDAT, Aprobada)"
     },
     {
       "Course":"Lenguajes de Programaci\u00f3n",
@@ -480,8 +480,8 @@
       "Credits":"10.00",
       "Prerequisites to Take":"(GEXTING, Aprobada), (GIINFBD, Regularizada), (GIINDEST2, Regularizada), (GIINFAED, Aprobada), (GIINDEST1, Aprobada), (1, Aprobado)",
       "Prerequisites to Pass":"(GIINFBD, Aprobada), (GIINDEST2, Aprobada)",
-      "Prerequisite to Take for":"(GIINFTRGRAD, Regularizada)",
-      "Prerequisite to Pass for":"(GIINFTRGRAD, Regularizada)"
+      "Prerequisite to Take for":"(GIINFTRGRAD, Regularizada), (GIINFIAGEN, Regularizada)",
+      "Prerequisite to Pass for":"(GIINFTRGRAD, Aprobada), (GIINFIAGEN, Aprobada)"
     },
     {
       "Course":"Sistemas Distribuidos",
@@ -531,7 +531,7 @@
       "Course":"Trabajo de Grado",
       "ID":"GIINFTRGRAD",
       "Year":5,
-      "Semester":1,
+      "Semester":null,
       "Credits":"52.00",
       "Prerequisites to Take":"(GIINFPC, Regularizada), (GIINFASCS, Regularizada), (GIINFSEGI, Regularizada), (GIINDETPROF, Regularizada), (GIINFOPMLINF, Regularizada), (GEXTING, Aprobada), (1, Aprobado), (2, Aprobado), (3, Aprobado)",
       "Prerequisites to Pass":"(GIINFPC, Regularizada), (GIINFASCS, Regularizada), (GIINFSEGI, Regularizada), (GIINDETPROF, Regularizada), (GIINFOPMLINF, Regularizada), (GEXTING, Aprobada), (1, Aprobado), (2, Aprobado), (3, Aprobado)",
@@ -924,7 +924,128 @@
       "Prerequisite to Pass for":null
     },
     {
-      "Course":"Pr\u00e1ctica Profesional Supervisada",
+      "Course":"Desarrollo Web",
+      "ID":"GIINFDWEB",
+      "Year":"Electives",
+      "Semester":null,
+      "Credits":"5.00",
+      "Prerequisites to Take":"(GIINFL2, Regularizada), (GIINFL1, Aprobada)",
+      "Prerequisites to Pass":"(GIINFL2, Aprobada)",
+      "Prerequisite to Take for":null,
+      "Prerequisite to Pass for":null
+    },
+    {
+      "Course":"Análisis de Datos",
+      "ID":"GIINFANDAT",
+      "Year":"Electives",
+      "Semester":null,
+      "Credits":"10.00",
+      "Prerequisites to Take":"(GIINFINGS, Regularizada), (GIINFDS, Aprobada)",
+      "Prerequisites to Pass":"(GIINFINGS, Aprobada)",
+      "Prerequisite to Take for":null,
+      "Prerequisite to Pass for":null
+    },
+    {
+      "Course":"Seguridad en Redes",
+      "ID":"GIINFSEGR",
+      "Year":"Electives",
+      "Semester":null,
+      "Credits":"5.00",
+      "Prerequisites to Take":"(GIINFLCD, Aprobada), (GIINFRCDA, Regularizada)",
+      "Prerequisites to Pass":"(GIINFRCDA, Aprobada)",
+      "Prerequisite to Take for":null,
+      "Prerequisite to Pass for":null
+    },
+    {
+      "Course":"Taller de Física",
+      "ID":"GIINFFISICA",
+      "Year":"Electives",
+      "Semester":null,
+      "Credits":"5.00",
+      "Prerequisites to Take":null,
+      "Prerequisites to Pass":null,
+      "Prerequisite to Take for":null,
+      "Prerequisite to Pass for":null
+    },
+    {
+      "Course":"Taller de Habilidades y Competencias",
+      "ID":"GIINFTHCOM",
+      "Year":"Electives",
+      "Semester":null,
+      "Credits":"5.00",
+      "Prerequisites to Take":null,
+      "Prerequisites to Pass":null,
+      "Prerequisite to Take for":null,
+      "Prerequisite to Pass for":null
+    },
+    {
+      "Course":"Pensamiento Computacional y Algoritmo",
+      "ID":"GIINFPCOAL",
+      "Year":"Electives",
+      "Semester":null,
+      "Credits":"5.00",
+      "Prerequisites to Take":null,
+      "Prerequisites to Pass":null,
+      "Prerequisite to Take for":null,
+      "Prerequisite to Pass for":null
+    },
+    {
+      "Course":"Inteligencia Artificial Generativa",
+      "ID":"GIINFIAGEN",
+      "Year":"Electives",
+      "Semester":null,
+      "Credits":"8.00",
+      "Prerequisites to Take":"(GIINFOPMLINF, Regularizada)",
+      "Prerequisites to Pass":"(GIINFOPMLINF, Aprobada)",
+      "Prerequisite to Take for":null,
+      "Prerequisite to Pass for":null
+    },
+    {
+      "Course":"Desarrollo de Habilidades Blandas para Ingenieros",
+      "ID":"GIINFDHBI",
+      "Year":"Electives",
+      "Semester":null,
+      "Credits":"5.00",
+      "Prerequisites to Take":null,
+      "Prerequisites to Pass":null,
+      "Prerequisite to Take for":null,
+      "Prerequisite to Pass for":null
+    },
+    {
+      "Course":"Gobierno, Riesgo y Cumplimiento en Departamentos de Sistemas",
+      "ID":"GIINFGRCDS",
+      "Year":"Electives",
+      "Semester":null,
+      "Credits":"5.00",
+      "Prerequisites to Take":null,
+      "Prerequisites to Pass":null,
+      "Prerequisite to Take for":null,
+      "Prerequisite to Pass for":null
+    },
+    {
+      "Course":"Arquitecturas de nube con AWS",
+      "ID":"GIINFANAWS",
+      "Year":"Electives",
+      "Semester":null,
+      "Credits":"5.00",
+      "Prerequisites to Take":null,
+      "Prerequisites to Pass":null,
+      "Prerequisite to Take for":null,
+      "Prerequisite to Pass for":null
+    },
+    {
+      "Course":"Introducción al Desarrollo de Videojuegos",
+      "ID":"GIINFIDVJ",
+      "Year":"Electives",
+      "Semester":null,
+      "Credits":"5.00",
+      "Prerequisites to Take":null,
+      "Prerequisites to Pass":null,
+      "Prerequisite to Take for":null,
+      "Prerequisite to Pass for":null
+    },
+    {
+      "Course":"Práctica Profesional Supervisada",
       "ID":"GIINFPRA.PROF",
       "Year":"Other Requirements",
       "Semester":null,

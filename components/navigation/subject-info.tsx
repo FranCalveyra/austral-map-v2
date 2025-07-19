@@ -127,7 +127,12 @@ export function SubjectInfo({ selectedSubject, nodes, onStatusChange, onGradeCha
           <div className="flex flex-col md:flex-row items-start md:items-center space-y-1 md:space-y-0 md:space-x-4 text-sm text-blue-200">
             <span className="flex items-center">
               <Calendar className="h-4 w-4 mr-1" />
-              {selectedSubject.Year === 0 ? 'Curso de Ingreso' : `Año ${selectedSubject.Year}${selectedSubject.Semester ? `, Cuatrimestre ${selectedSubject.Semester}` : ' (ANUAL)'}`}
+              {selectedSubject.isElective
+                ? 'Electiva'
+                : selectedSubject.Year === 0
+                ? 'Curso de Ingreso'
+                : `Año ${selectedSubject.Year}${selectedSubject.Semester ? `, Cuatrimestre ${selectedSubject.Semester}` : ' (ANUAL)'}`
+              }
             </span>
             <span>ID: {selectedSubject.ID}</span>
             <span>{selectedSubject.Credits} créditos</span>
