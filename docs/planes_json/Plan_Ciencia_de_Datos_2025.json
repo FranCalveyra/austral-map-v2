@@ -399,10 +399,10 @@
     "Course": "Proyecto",
     "ID": "35",
     "Year": 4,
-    "Semester": 1,
+    "Semester": null,
     "Credits": "5.00",
-    "Prerequisites to Take": null,
-    "Prerequisites to Pass": null,
+    "Prerequisites to Take": "(24, Regularizada), (25, Regularizada), (26, Regularizada), (27, Regularizada), (28, Regularizada), (29, Regularizada), (30, Regularizada), (31, Regularizada)",
+    "Prerequisites to Pass": "(24, Aprobada), (25, Aprobada), (26, Aprobada), (27, Aprobada), (28, Aprobada), (29, Aprobada), (30, Aprobada), (31, Aprobada)",
     "Prerequisite to Take for": null,
     "Prerequisite to Pass for": null
   },
@@ -436,17 +436,6 @@
     "Credits": "4.00",
     "Prerequisites to Take": "(29, Regularizada)",
     "Prerequisites to Pass": "(29, Aprobada)",
-    "Prerequisite to Take for": null,
-    "Prerequisite to Pass for": null
-  },
-  {
-    "Course": "Proyecto",
-    "ID": "35",
-    "Year": 4,
-    "Semester": 2,
-    "Credits": "5.00",
-    "Prerequisites to Take": null,
-    "Prerequisites to Pass": null,
     "Prerequisite to Take for": null,
     "Prerequisite to Pass for": null
   },

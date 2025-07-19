@@ -497,8 +497,8 @@
   {
     "Course": "Electiva I",
     "ID": "44",
-    "Year": 4,
-    "Semester": 1,
+    "Year": "Electives",
+    "Semester": null,
     "Credits": "5.00",
     "Prerequisites to Take": null,
     "Prerequisites to Pass": null,
@@ -563,8 +563,8 @@
   {
     "Course": "Electiva II",
     "ID": "51",
-    "Year": 4,
-    "Semester": 2,
+    "Year": "Electives",
+    "Semester": null,
     "Credits": "5.00",
     "Prerequisites to Take": null,
     "Prerequisites to Pass": null,
@@ -618,8 +618,8 @@
   {
     "Course": "Electiva III",
     "ID": "56",
-    "Year": 5,
-    "Semester": 1,
+    "Year": "Electives",
+    "Semester": null,
     "Credits": "5.00",
     "Prerequisites to Take": null,
     "Prerequisites to Pass": null,
@@ -673,8 +673,8 @@
   {
     "Course": "Electiva IV",
     "ID": "62",
-    "Year": 5,
-    "Semester": 2,
+    "Year": "Electives",
+    "Semester": null,
     "Credits": "5.00",
     "Prerequisites to Take": null,
     "Prerequisites to Pass": null,
@@ -687,8 +687,8 @@
     "Year": 5,
     "Semester": null,
     "Credits": "7.50",
-    "Prerequisites to Take": "(3er Año aprobado - 4to Año 1er Cuatrimestre\nregularizado, Regularizada)",
-    "Prerequisites to Pass": "(3er Año aprobado - 4to Año 1er Cuatrimestre\nregularizado, Aprobada)",
+    "Prerequisites to Take": "(24, Aprobada), (25, Aprobada), (26, Aprobada), (27, Aprobada), (28, Aprobada), (29, Aprobada), (30, Aprobada), (31, Aprobada), (32, Aprobada), (33, Aprobada), (34, Aprobada), (35, Aprobada), (36, Aprobada), (37, Aprobada), (38, Aprobada), (39, Regularizada), (40, Regularizada), (41, Regularizada), (42, Regularizada), (43, Regularizada)",
+    "Prerequisites to Pass": "(39, Aprobada), (40, Aprobada), (41, Aprobada), (42, Aprobada), (43, Aprobada)",
     "Prerequisite to Take for": null,
     "Prerequisite to Pass for": null
   }
