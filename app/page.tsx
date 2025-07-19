@@ -81,6 +81,7 @@ export default function Home() {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('planName', selectedPlan.name);
 
       const response = await fetch('/api/parse-plan', {
         method: 'POST',
