@@ -35,16 +35,16 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
   // Filter nodes based on display settings
   const coreNodes = React.useMemo(() => {
     const filtered = nodes.filter(node => {
-      // Always exclude electives from main graph
-      if (node.isElective) return false;
-      
+      // Exclude electives from main graph unless toggled on
+      if (node.isElective && !showElectives) return false;
+
       // Filter ingress course (Year 0) based on toggle
       if (!showIngressCourse && node.Year === 0) return false;
-      
+
       return true;
     });
     return filtered;
-  }, [nodes, showIngressCourse]);
+  }, [nodes, showIngressCourse, showElectives]);
   
   const connections = React.useMemo(() => {
     return getConnections(coreNodes);
@@ -289,6 +289,19 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
             </div>
           );
         })}
+        {/* Electives header */}
+        {showElectives && (
+          <div className="absolute" style={{ left: startX + (semesters.length + 1) * columnWidth }}>
+            <div
+              className={`rounded-lg shadow-md border border-cyan-500 p-3 ${NODE_WIDTH_CLASS} ${NODE_HEIGHT_CLASS} flex items-center justify-center`}
+              style={{ backgroundColor: '#21262d' }}
+            >
+              <div className="font-semibold text-cyan-400 text-center">
+                Electivas
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Connections */}

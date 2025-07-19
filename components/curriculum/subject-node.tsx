@@ -29,24 +29,24 @@ export function SubjectNodeComponent({
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(true);
-    
+
     // Calculate offset from mouse position to node position
     dragOffsetRef.current = {
       x: e.clientX - subject.x,
       y: e.clientY - subject.y
     };
-    
+
     // Immediately attach global event listeners
     document.addEventListener('mousemove', handleMouseMove, { passive: false });
     document.addEventListener('mouseup', handleMouseUp, { passive: false });
-    
+
     // Prevent text selection during drag
     document.body.style.userSelect = 'none';
   };
 
   const handleMouseMove = (e: MouseEvent) => {
     e.preventDefault();
-    
+
     // Only allow vertical movement - keep x position fixed
     const newY = e.clientY - dragOffsetRef.current.y;
     onDrag(subject.ID, subject.x, newY);
@@ -54,11 +54,11 @@ export function SubjectNodeComponent({
 
   const handleMouseUp = () => {
     setIsDragging(false);
-    
+
     // Clean up event listeners
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
-    
+
     // Restore text selection
     document.body.style.userSelect = '';
   };
@@ -74,7 +74,6 @@ export function SubjectNodeComponent({
 
   const getNodeColor = () => {
     if (isSelected) return 'bg-blue-500 border-blue-600 text-white';
-    
     switch (subject.status) {
       case 'APROBADA':
         return 'bg-green-500 border-green-600 text-white';
@@ -85,10 +84,15 @@ export function SubjectNodeComponent({
       case 'DESAPROBADA':
         return 'bg-gray-700 border-gray-500 text-gray-100';
       case 'DISPONIBLE':
+        // Electives default grey for available status
+        if (subject.isElective) return 'bg-gray-200 border-gray-300 text-gray-800';
         return 'bg-gray-700 border-gray-500 text-gray-100 hover:border-blue-400';
       case 'NO_DISPONIBLE':
+        // Electives default grey for unavailable status
+        if (subject.isElective) return 'bg-gray-200 border-gray-300 text-gray-800';
         return 'bg-gray-800 border-gray-600 text-gray-400';
       default:
+        // Fallback color for any other statuses
         return 'bg-gray-700 border-gray-500 text-gray-100';
     }
   };
@@ -113,25 +117,8 @@ export function SubjectNodeComponent({
     }
   };
 
-  const getStatusColor = () => {
-    switch (subject.status) {
-      case 'APROBADA':
-        return 'bg-green-600';
-      case 'CURSANDO':
-        return 'bg-blue-600';
-      case 'EN_FINAL':
-        return 'bg-yellow-600';
-      case 'DESAPROBADA':
-        return 'bg-red-600';
-      default:
-        return 'bg-gray-600';
-    }
-  };
-
-  const statusIcon = getStatusIcon();
-  
-  // Use extended width for annual subjects (Semester is null)
-  const isAnnual = subject.Semester === null;
+  // Identify annual subjects (Semester null) but not electives
+  const isAnnual = subject.Semester === null && !subject.isElective;
   const widthClass = isAnnual ? 'w-[430px]' : NODE_WIDTH_CLASS; // 430px spans across two semesters (180px + 250px column gap)
 
   return (
@@ -153,16 +140,16 @@ export function SubjectNodeComponent({
         willChange: isDragging ? 'transform' : 'auto'
       }}
       onMouseDown={handleMouseDown}
-      onClick={(e) => { 
+      onClick={(e) => {
         if (!isDragging) {
-          e.stopPropagation(); 
-          onClick(subject); 
+          e.stopPropagation();
+          onClick(subject);
         }
       }}
-      onDoubleClick={(e) => { 
+      onDoubleClick={(e) => {
         if (!isDragging) {
-          e.stopPropagation(); 
-          onDoubleClick(subject); 
+          e.stopPropagation();
+          onDoubleClick(subject);
         }
       }}
     >

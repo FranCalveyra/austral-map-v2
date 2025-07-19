@@ -550,17 +550,6 @@
     "Prerequisite to Pass for": null
   },
   {
-    "Course": "Práctica Profesional Supervisada",
-    "ID": "49",
-    "Year": 4,
-    "Semester": 2,
-    "Credits": "17.00",
-    "Prerequisites to Take": "(3er Año aprobado - 4to Año 1er Cuatrimestre\nregularizado, Regularizada)",
-    "Prerequisites to Pass": "(3er Año aprobado - 4to Año 1er Cuatrimestre\nregularizado, Aprobada)",
-    "Prerequisite to Take for": null,
-    "Prerequisite to Pass for": null
-  },
-  {
     "Course": "Balance de Masa y Energía",
     "ID": "50",
     "Year": 4,
@@ -595,7 +584,7 @@
   },
   {
     "Course": "Legal",
-    "ID": "53",
+    "ID": "57",
     "Year": 5,
     "Semester": 1,
     "Credits": "4.00",
@@ -634,17 +623,6 @@
     "Credits": "5.00",
     "Prerequisites to Take": null,
     "Prerequisites to Pass": null,
-    "Prerequisite to Take for": null,
-    "Prerequisite to Pass for": null
-  },
-  {
-    "Course": "Proyecto final de carrera",
-    "ID": "57",
-    "Year": 5,
-    "Semester": null,
-    "Credits": "7.50",
-    "Prerequisites to Take": "(3er Año aprobado - 4to Año 1er Cuatrimestre\nregularizado, Regularizada)",
-    "Prerequisites to Pass": "(3er Año aprobado - 4to Año 1er Cuatrimestre\nregularizado, Aprobada)",
     "Prerequisite to Take for": null,
     "Prerequisite to Pass for": null
   },

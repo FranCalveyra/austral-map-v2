@@ -193,7 +193,37 @@ export function calculateLayout(subjects: Subject[]): SubjectNode[] {
         });
       });
     });
-  
+
+  // Process elective subjects as columns to the right of the last semester
+  const electiveSubjects = subjects.filter(subject => subject.Year === 'Electives');
+  if (electiveSubjects.length > 0) {
+    // Determine the last semester column index based on core subjects
+    const numericCoreYears = coreSubjects.map(s => Number(s.Year));
+    const maxYear = numericCoreYears.length ? Math.max(...numericCoreYears) : 0;
+    const baseColumnIndex = 2 * maxYear + 1;
+    const numSlotsPerColumn = 6;
+    electiveSubjects.forEach((subject, index) => {
+      const colOffset = Math.floor(index / numSlotsPerColumn);
+      const rowOffset = index % numSlotsPerColumn;
+      const columnIndex = baseColumnIndex + colOffset;
+      const x = startX + columnIndex * columnWidth;
+      const y = startY + rowOffset * nodeHeight;
+      const initialStatus = (subject as any).status || 'NO_DISPONIBLE';
+      const initialGrade = (subject as any).grade || null;
+      nodes.push({
+        ...subject,
+        x,
+        y,
+        status: initialStatus as SubjectStatus,
+        isHighlighted: false,
+        isElective: true,
+        prerequisites: parsePrerequisites(subject["Prerequisites to Take"]) || parsePrerequisites(subject["Prerequisites to Pass"]) || [],
+        prerequisiteFor: parsePrerequisites(subject["Prerequisite to Take for"]) || parsePrerequisites(subject["Prerequisite to Pass for"]) || [],
+        grade: initialGrade,
+      });
+    });
+  }
+
   // Calculate initial status for all nodes
   // Keep explicit statuses from uploaded data (APROBADA, CURSANDO, etc.)
   // Recalculate DISPONIBLE/NO_DISPONIBLE based on dependencies

@@ -471,38 +471,5 @@
     "Prerequisites to Pass": "(26, Aprobada)",
     "Prerequisite to Take for": null,
     "Prerequisite to Pass for": null
-  },
-  {
-    "Course": "Asignaturas optativas",
-    "ID": "41",
-    "Year": 4,
-    "Semester": null,
-    "Credits": "15.00",
-    "Prerequisites to Take": null,
-    "Prerequisites to Pass": null,
-    "Prerequisite to Take for": null,
-    "Prerequisite to Pass for": null
-  },
-  {
-    "Course": "Pasantía, proyectos, otros.",
-    "ID": "42",
-    "Year": 4,
-    "Semester": null,
-    "Credits": "21.00",
-    "Prerequisites to Take": null,
-    "Prerequisites to Pass": null,
-    "Prerequisite to Take for": null,
-    "Prerequisite to Pass for": null
-  },
-  {
-    "Course": "Programa de Vida Universitaria",
-    "ID": "43",
-    "Year": 4,
-    "Semester": null,
-    "Credits": "5.00",
-    "Prerequisites to Take": null,
-    "Prerequisites to Pass": null,
-    "Prerequisite to Take for": null,
-    "Prerequisite to Pass for": null
   }
 ]

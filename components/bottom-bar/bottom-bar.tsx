@@ -1,7 +1,8 @@
 "use client";
 
 import React from 'react';
-import { Info, GraduationCap, HelpCircle, ChevronDown } from 'lucide-react';
+import { Info, GraduationCap, HelpCircle, Layers } from 'lucide-react';
+import { DeveloperInfo } from '../navigation/developer-info';
 
 interface ProgressData {
   ingress: { approved: number; total: number };
@@ -20,9 +21,6 @@ interface BottomBarProps {
   onToggleIngressCourse: () => void;
   showProjectInfo: boolean;
   onToggleProjectInfo: () => void;
-  planOptions: string[];
-  selectedPlanName: string;
-  onPlanSelect: (planName: string) => void;
 }
 
 export function BottomBar({
@@ -35,33 +33,19 @@ export function BottomBar({
   onToggleIngressCourse,
   showProjectInfo,
   onToggleProjectInfo,
-  planOptions,
-  selectedPlanName,
-  onPlanSelect
 }: BottomBarProps) {
+
   const totalSubjects = progress.ingress.total + progress.plan.total;
   const approvedSubjects = progress.ingress.approved + progress.plan.approved;
   const progressPercentage = totalSubjects > 0 ? (approvedSubjects / totalSubjects) * 100 : 0;
+  const electivePercentage = progress.electives.hoursNeeded > 0
+    ? (progress.electives.hoursCompleted / progress.electives.hoursNeeded) * 100
+    : 0;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 border-t border-gray-700 shadow-lg z-40 bg-[#21262d]">
       <div className="flex flex-col md:flex-row flex-wrap justify-between p-4">
-        {/* Selector de plan */}
-        <div className="mb-2 md:mb-0">
-          <div className="relative inline-block">
-            <select
-              value={selectedPlanName}
-              onChange={e => onPlanSelect(e.target.value)}
-              className="appearance-none bg-gray-800 text-white px-3 py-2 pr-8 rounded-md border border-gray-600"
-            >
-              {planOptions.map(name => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300" />
-          </div>
-        </div>
-        {/* Left side - Toggles */}
+        {/* Buttons section */}
         <div className="flex flex-col md:flex-row flex-wrap items-start md:items-center space-y-2 md:space-y-0 md:space-x-2">
           {/* Legend toggle */}
           <button
@@ -74,14 +58,14 @@ export function BottomBar({
           </button>
 
           {/* Electives toggle */}
-          {/* <button 
-            onClick={onToggleElectives} 
+          <button
+            onClick={onToggleElectives}
             className={`flex items-center px-3 py-2 rounded-md text-sm font-medium border transition-colors
               ${showElectives ? 'bg-gray-600 border-gray-500 text-white' : 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700'}`}
-          > 
+          >
             <Layers className="w-4 h-4 mr-2" />
             Electivas
-          </button> */}
+          </button>
 
           {/* Ingress Course toggle */}
           <button
@@ -125,15 +109,29 @@ export function BottomBar({
           </div>
 
           <div className="flex flex-col items-center">
-            <div className="w-full md:w-32 bg-gray-200 rounded-full h-3 mb-1">
-              <div
-                className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
-                style={{ width: `${progressPercentage}%` }}
-              ></div>
-            </div>
+                <div className="relative w-full md:w-32 bg-gray-200 rounded-full h-3 mb-1">
+                  <div
+                    className="absolute left-0 h-3 rounded-l-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                  {progress.electives.hoursNeeded > 0 && (
+                    <div
+                      className="absolute h-3 bg-cyan-500 rounded-r-full transition-all duration-500"
+                      style={{
+                        left: `${progressPercentage}%`,
+                        width: `${electivePercentage}%`,
+                      }}
+                    />
+                  )}
+                </div>
             <div className="text-xs text-gray-300">
               {progressPercentage.toFixed(1)}% completado
             </div>
+          </div>
+
+          {/* Developer Info moved here */}
+          <div className="flex items-center flex-shrink-0">
+            <DeveloperInfo />
           </div>
         </div>
       </div>

@@ -144,6 +144,12 @@ export default function Home() {
         onGradeChange={handleGradeChange}
         onFileUpload={handleFileUpload}
         studentName={studentName}
+        planOptions={PLANS.map(p => p.name)}
+        selectedPlanName={selectedPlan.name}
+        onPlanSelect={planName => {
+          const plan = PLANS.find(p => p.name === planName);
+          if (plan) setSelectedPlan(plan);
+        }}
       />
 
       {/* Loading overlay */}
@@ -185,35 +191,7 @@ export default function Home() {
           onStatusChange={handleStatusChange}
         />
       </main>
-
-      {showElectives && (
-        <section className="p-4 bg-white mt-8">
-          <h2 className="text-xl font-semibold mb-4">
-            Electivas ({electiveApproved}/{electiveSubjectsNeeded} materias - {electiveHoursCompleted}/384 horas completadas)
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {electiveNodes.map(electiveNode => (
-              <div
-                key={electiveNode.ID}
-                className={`border rounded-lg p-4 shadow-sm cursor-pointer transition-all
-                  ${electiveNode.status === 'APROBADA' ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200 hover:border-blue-300'}`}
-                onClick={() => handleStatusChange(electiveNode.ID, electiveNode.status === 'APROBADA' ? 'DISPONIBLE' : 'APROBADA')}
-              >
-                <div className="font-semibold text-gray-800">{electiveNode.Course}</div>
-                <div className="text-sm text-gray-600">ID: {electiveNode.ID}</div>
-                <div className="text-xs mt-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium
-                    ${electiveNode.status === 'APROBADA' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                    {electiveNode.status === 'APROBADA' ? '✓ Aprobada' : 'Pendiente'}
-                  </span>
-                </div>
-                <div className="text-xs text-gray-500 mt-1">5 créditos (32 horas)</div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
+      {/* Electives integrated into the map; popup removed */}
       {/* Bottom Bar */}
       <BottomBar
         progress={{
@@ -230,12 +208,6 @@ export default function Home() {
         onToggleIngressCourse={() => setShowIngressCourse(prev => !prev)}
         showProjectInfo={showProjectInfo}
         onToggleProjectInfo={() => setShowProjectInfo(prev => !prev)}
-        planOptions={PLANS.map(p => p.name)}
-        selectedPlanName={selectedPlan.name}
-        onPlanSelect={planName => {
-          const plan = PLANS.find(p => p.name === planName);
-          if (plan) setSelectedPlan(plan);
-        }}
       />
 
       {/* Project Info Modal */}
