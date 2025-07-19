@@ -104,7 +104,7 @@ export function BottomBar({
             <div className="text-xs text-gray-300 flex space-x-4">
               <span>Curso de Ingreso: {progress.ingress.approved}/{progress.ingress.total}</span>
               <span>Plan: {progress.plan.approved}/{progress.plan.total}</span>
-              <span>Electivas: {progress.electives.subjectsCompleted * 32}/{progress.electives.subjectsNeeded * 32} horas</span>
+              <span>Electivas: {progress.electives.hoursCompleted}/{progress.electives.hoursNeeded} horas</span>
             </div>
           </div>
 

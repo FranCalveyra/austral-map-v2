@@ -14,9 +14,9 @@ import { calculateSubjectStatus, calculateLayout } from '@/lib/curriculum-parser
 
 // Array de planes disponibles
 const PLANS = [
-  { name: 'Licenciatura en Ciencia de Datos', curriculum: planCiencia },
-  { name: 'Ingeniería Industrial', curriculum: planIndustrial },
-  { name: 'Ingeniería Informática', curriculum: planInformatico },
+  { name: 'Licenciatura en Ciencia de Datos', curriculum: planCiencia, electiveHoursRequired: 192 },
+  { name: 'Ingeniería Industrial', curriculum: planIndustrial, electiveHoursRequired: 256 },
+  { name: 'Ingeniería Informática', curriculum: planInformatico, electiveHoursRequired: 384 },
 ];
 
 export default function Home() {
@@ -122,9 +122,16 @@ export default function Home() {
   const planApproved = planNodes.filter(node => node.status === 'APROBADA').length;
   const electiveApproved = electiveNodes.filter(node => node.status === 'APROBADA').length;
 
-  // Calculate elective hours (5 credits = 32 hours, need 384 hours total)
-  const electiveSubjectsNeeded = 384 / 32; // 384 hours / 32 hours per subject = 12 subjects
-  const electiveHoursCompleted = electiveApproved * 32; // Each elective subject = 32 hours
+  // Calculate elective hours (5 credits = 32 hours)
+  const electiveHoursNeeded = selectedPlan.electiveHoursRequired;
+  const electiveSubjectsNeeded = electiveHoursNeeded / 32;
+  const electiveHoursCompleted = electiveNodes
+    .filter(node => node.status === 'APROBADA')
+    .reduce((sum, node) => {
+      const credits = parseFloat(node.Credits as string) || 0;
+      // 5 credits correspond to 32 hours
+      return sum + (credits * 32 / 5);
+    }, 0);
 
   const approvedCount = planApproved + ingressApproved;
 
@@ -197,7 +204,7 @@ export default function Home() {
         progress={{
           ingress: { approved: ingressApproved, total: ingressNodes.length },
           plan: { approved: planApproved, total: planNodes.length },
-          electives: { hoursCompleted: electiveHoursCompleted, hoursNeeded: 384, subjectsCompleted: electiveApproved, subjectsNeeded: electiveSubjectsNeeded },
+          electives: { hoursCompleted: electiveHoursCompleted, hoursNeeded: electiveHoursNeeded, subjectsCompleted: electiveApproved, subjectsNeeded: electiveSubjectsNeeded },
           averageGrade: averageGrade
         }}
         showLegend={showLegend}
