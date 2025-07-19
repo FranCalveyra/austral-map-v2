@@ -49,6 +49,27 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
     return filtered;
   }, [nodes, showIngressCourse, showElectives]);
 
+  const electiveHeaderPosition = React.useMemo(() => {
+    if (!showElectives) return { visible: false, left: 0 };
+    
+    const electiveNodes = coreNodes.filter(node => node.isElective);
+    if (electiveNodes.length === 0) return { visible: false, left: 0 };
+
+    const planNodes = coreNodes.filter(node => !node.isElective && node.Year !== 0 && typeof node.Year === 'number');
+    const maxYear = planNodes.length > 0 ? Math.max(...planNodes.map(node => node.Year as number)) : 0;
+    
+    const electiveStartColumnIndex = 1 + maxYear * 2;
+    const numSlotsPerColumn = 6;
+    const numElectiveColumns = Math.ceil(electiveNodes.length / numSlotsPerColumn);
+    
+    const electiveBlockStartX = startX + electiveStartColumnIndex * columnWidth;
+    const electiveColumnsTotalWidth = (numElectiveColumns * columnWidth) - (columnWidth - 180); // Adjust for the last column not having a full gap
+    
+    const leftPosition = electiveBlockStartX + (electiveColumnsTotalWidth / 2) - (180 / 2);
+
+    return { visible: true, left: leftPosition };
+  }, [coreNodes, showElectives, startX, columnWidth]);
+
   // Auto-fit view: compute zoom and panOffset to show all nodes
   React.useLayoutEffect(() => {
     if (!containerRef.current || coreNodes.length === 0) return;
@@ -328,8 +349,8 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
           );
         })}
         {/* Electives header */}
-        {showElectives && (
-          <div className="absolute" style={{ left: startX + (semesters.length + 1) * columnWidth }}>
+        {electiveHeaderPosition.visible && (
+          <div className="absolute" style={{ left: electiveHeaderPosition.left }}>
             <div
               className={`rounded-lg shadow-md border border-cyan-500 p-3 ${NODE_WIDTH_CLASS} ${NODE_HEIGHT_CLASS} flex items-center justify-center`}
               style={{ backgroundColor: '#21262d' }}

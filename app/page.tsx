@@ -20,32 +20,49 @@ const PLANS = [
 ];
 
 export default function Home() {
-  // Plan seleccionado (por defecto Ing Industrial)
   const [selectedPlan, setSelectedPlan] = useState(PLANS[2]);
-  // Courses base a partir del plan seleccionado
-  const [curriculum, setCurriculum] = useState<Subject[]>(() => CurriculumSchema.parse(selectedPlan.curriculum));
-  const [nodes, setNodes] = useState<SubjectNode[]>(() => calculateLayout(curriculum));
-  // Al cambiar el plan, recalcular curriculum y nodos
+  const [allPlanNodes, setAllPlanNodes] = useState<{ [key: string]: SubjectNode[] }>({});
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true
+
   useEffect(() => {
-    const newCurr = CurriculumSchema.parse(selectedPlan.curriculum as any);
-    setCurriculum(newCurr);
-    setNodes(calculateLayout(newCurr));
-    setSelectedSubject(null);
+    setIsLoading(true);
+    // Simulate loading to ensure the UI updates before calculating layout
+    setTimeout(() => {
+      if (!allPlanNodes[selectedPlan.name]) {
+        const newCurr = CurriculumSchema.parse(selectedPlan.curriculum as any);
+        const newNodes = calculateLayout(newCurr);
+        setAllPlanNodes(prev => ({ ...prev, [selectedPlan.name]: newNodes }));
+      }
+      setIsLoading(false);
+    }, 50); // A small delay
   }, [selectedPlan]);
 
-  const initialStudentName = undefined;
+  const nodes = allPlanNodes[selectedPlan.name] || [];
 
+  const handlePlanSelect = (planName: string) => {
+    const plan = PLANS.find(p => p.name === planName);
+    if (plan) {
+      setSelectedPlan(plan);
+      setSelectedSubject(null);
+    }
+  };
+  
   const [selectedSubject, setSelectedSubject] = useState<SubjectNode | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [studentName, setStudentName] = useState<string | undefined>(initialStudentName);
+  const [studentName, setStudentName] = useState<string | undefined>(undefined);
 
+  const updateNodesForCurrentPlan = (newNodes: SubjectNode[]) => {
+    setAllPlanNodes(prev => ({ ...prev, [selectedPlan.name]: newNodes }));
+  };
+  
   const handleGradeChange = (subjectId: string, grade: number) => {
-    setNodes(prev => prev.map(node => node.ID === subjectId ? { ...node, grade } : node));
+    const newNodes = nodes.map(node => node.ID === subjectId ? { ...node, grade } : node);
+    updateNodesForCurrentPlan(newNodes);
     if (selectedSubject?.ID === subjectId) {
       setSelectedSubject(prev => prev ? { ...prev, grade } : null);
     }
   };
+
   const [showLegend, setShowLegend] = useState(false);
   const [showElectives, setShowElectives] = useState(false);
   const [showIngressCourse, setShowIngressCourse] = useState(true);
@@ -54,16 +71,15 @@ export default function Home() {
   const handleSubjectSelect = (subject: SubjectNode | null) => {
     setSelectedSubject(subject);
   };
-
+  
   const handleStatusChange = (subjectId: string, status: SubjectStatus) => {
-    setNodes(prev => {
-      const updated = prev.map(node => node.ID === subjectId ? { ...node, status } : node);
-      return updated.map(node =>
-        node.ID === subjectId
-          ? node
-          : { ...node, status: calculateSubjectStatus(node, updated) }
-      );
-    });
+    const updated = nodes.map(node => node.ID === subjectId ? { ...node, status } : node);
+    const newNodes = updated.map(node =>
+      node.ID === subjectId
+        ? node
+        : { ...node, status: calculateSubjectStatus(node, updated) }
+    );
+    updateNodesForCurrentPlan(newNodes);
 
     if (selectedSubject?.ID === subjectId) {
       setSelectedSubject(prev => prev ? { ...prev, status } : null);
@@ -71,34 +87,29 @@ export default function Home() {
   };
 
   const handleNodeDrag = (id: string, x: number, y: number) => {
-    setNodes(prev => prev.map(node => node.ID === id ? { ...node, x, y } : node));
+    const newNodes = nodes.map(node => node.ID === id ? { ...node, x, y } : node);
+    updateNodesForCurrentPlan(newNodes);
   };
 
   const handleFileUpload = async (file: File) => {
     setIsLoading(true);
     setError(null);
-
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('planName', selectedPlan.name);
-
       const response = await fetch('/api/parse-plan', {
         method: 'POST',
         body: formData,
       });
-
       const result = await response.json();
-
       if (!response.ok) {
         throw new Error(result.error || 'Failed to process file');
       }
-
       if (result.success && result.data) {
         const newCurriculum = CurriculumSchema.parse(result.data);
-        setCurriculum(newCurriculum);
         const newNodes = calculateLayout(newCurriculum);
-        setNodes(newNodes);
+        updateNodesForCurrentPlan(newNodes);
         setSelectedSubject(null);
         if (result.studentName) {
           setStudentName(result.studentName);
@@ -114,29 +125,24 @@ export default function Home() {
     }
   };
 
-  // Calculate different types of progress
   const ingressNodes = nodes.filter(node => node.Year === 0);
   const planNodes = nodes.filter(node => typeof node.Year === 'number' && node.Year > 0 && !node.isElective);
   const electiveNodes = nodes.filter(node => node.isElective);
-
   const ingressApproved = ingressNodes.filter(node => node.status === 'APROBADA').length;
-  const planApproved = planNodes.filter(node => node.status === 'APROBADA').length;
-  const electiveApproved = electiveNodes.filter(node => node.status === 'APROBADA').length;
-
-  // Calculate elective hours (5 credits = 32 hours)
+  const approvedPlanCredits = planNodes
+    .filter(n => n.status === 'APROBADA')
+    .reduce((sum, node) => sum + (parseFloat(node.Credits || '0')), 0);
+  const totalPlanCredits = planNodes
+    .reduce((sum, node) => sum + (parseFloat(node.Credits || '0')), 0);
   const electiveHoursNeeded = selectedPlan.electiveHoursRequired;
-  const electiveSubjectsNeeded = electiveHoursNeeded / 32;
-  const electiveHoursCompleted = electiveNodes
+  const completedElectiveHours = electiveNodes
     .filter(node => node.status === 'APROBADA')
     .reduce((sum, node) => {
       const credits = parseFloat(node.Credits as string) || 0;
-      // 5 credits correspond to 32 hours
       return sum + (credits * 32 / 5);
     }, 0);
-
-  const approvedCount = planApproved + ingressApproved;
-
-  // Calculate average grade from approved subjects with grades
+  const electivesEquivalentCredits = electiveHoursNeeded * 5 / 32;
+  const totalCareerCredits = totalPlanCredits + electivesEquivalentCredits;
   const approvedSubjectsWithGrades = [...ingressNodes, ...planNodes]
     .filter(node => node.status === 'APROBADA' && node.grade != null);
   const averageGrade = approvedSubjectsWithGrades.length > 0
@@ -154,10 +160,7 @@ export default function Home() {
         studentName={studentName}
         planOptions={PLANS.map(p => p.name)}
         selectedPlanName={selectedPlan.name}
-        onPlanSelect={planName => {
-          const plan = PLANS.find(p => p.name === planName);
-          if (plan) setSelectedPlan(plan);
-        }}
+        onPlanSelect={handlePlanSelect}
       />
 
       {/* Loading overlay */}
@@ -174,7 +177,7 @@ export default function Home() {
 
       {/* Error message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mx-4 mt-4">
+        <div className="bg-red-50 border-red-200 text-red-700 px-4 py-3 rounded relative mx-4 mt-4">
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{error}</span>
           <button
@@ -186,7 +189,7 @@ export default function Home() {
           </button>
         </div>
       )}
-
+      
       <main className="flex-1 overflow-auto pb-16">
         <CurriculumGraph
           nodes={nodes}
@@ -199,14 +202,13 @@ export default function Home() {
           onStatusChange={handleStatusChange}
         />
       </main>
-      {/* Electives integrated into the map; popup removed */}
-      {/* Bottom Bar */}
       <BottomBar
         progress={{
           ingress: { approved: ingressApproved, total: ingressNodes.length },
-          plan: { approved: planApproved, total: planNodes.length },
-          electives: { hoursCompleted: electiveHoursCompleted, hoursNeeded: electiveHoursNeeded, subjectsCompleted: electiveApproved, subjectsNeeded: electiveSubjectsNeeded },
-          averageGrade: averageGrade
+          obligatorias: { approvedCredits: approvedPlanCredits, totalCredits: totalPlanCredits },
+          electives: { completedHours: completedElectiveHours, neededHours: electiveHoursNeeded },
+          averageGrade: averageGrade,
+          totalCareerCredits: totalCareerCredits,
         }}
         showLegend={showLegend}
         onToggleLegend={() => setShowLegend(prev => !prev)}
@@ -217,8 +219,6 @@ export default function Home() {
         showProjectInfo={showProjectInfo}
         onToggleProjectInfo={() => setShowProjectInfo(prev => !prev)}
       />
-
-      {/* Project Info Modal */}
       <ProjectInfoModal
         isOpen={showProjectInfo}
         onClose={() => setShowProjectInfo(false)}

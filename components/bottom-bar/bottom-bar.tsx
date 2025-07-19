@@ -6,9 +6,10 @@ import { DeveloperInfo } from '../navigation/developer-info';
 
 interface ProgressData {
   ingress: { approved: number; total: number };
-  plan: { approved: number; total: number };
-  electives: { hoursCompleted: number; hoursNeeded: number; subjectsCompleted: number; subjectsNeeded: number };
+  obligatorias: { approvedCredits: number; totalCredits: number };
+  electives: { completedHours: number; neededHours: number };
   averageGrade: number | null;
+  totalCareerCredits: number;
 }
 
 interface BottomBarProps {
@@ -35,12 +36,17 @@ export function BottomBar({
   onToggleProjectInfo,
 }: BottomBarProps) {
 
-  const totalSubjects = progress.ingress.total + progress.plan.total;
-  const approvedSubjects = progress.ingress.approved + progress.plan.approved;
-  const progressPercentage = totalSubjects > 0 ? (approvedSubjects / totalSubjects) * 100 : 0;
-  const electivePercentage = progress.electives.hoursNeeded > 0
-    ? (progress.electives.hoursCompleted / progress.electives.hoursNeeded) * 100
-    : 0;
+  // Calculate progress percentages for each segment
+  const obligatoriasProgress = progress.obligatorias.totalCredits > 0 ? (progress.obligatorias.approvedCredits / progress.obligatorias.totalCredits) * 100 : 0;
+  const electivasProgress = progress.electives.neededHours > 0 ? (progress.electives.completedHours / progress.electives.neededHours) * 100 : 0;
+
+  // Calculate the proportional width of each segment in the total bar
+  const electivasEquivalentCredits = progress.electives.neededHours * 5 / 32;
+  const obligatoriasWidth = progress.totalCareerCredits > 0 ? (progress.obligatorias.totalCredits / progress.totalCareerCredits) * 100 : 0;
+  const electivasWidth = progress.totalCareerCredits > 0 ? (electivasEquivalentCredits / progress.totalCareerCredits) * 100 : 0;
+
+  // Calculate overall progress percentage
+  const totalProgress = (obligatoriasProgress * obligatoriasWidth / 100) + (electivasProgress * electivasWidth / 100);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 border-t border-gray-700 shadow-lg z-40 bg-[#21262d]">
@@ -97,35 +103,27 @@ export function BottomBar({
                   • Promedio: {progress.averageGrade.toFixed(2)}
                 </span>
               )}
-              <span className="ml-3">
-              Progreso Total: {approvedSubjects}/{totalSubjects}
-              </span>
             </div>
             <div className="text-xs text-gray-300 flex space-x-4">
               <span>Curso de Ingreso: {progress.ingress.approved}/{progress.ingress.total}</span>
-              <span>Plan: {progress.plan.approved}/{progress.plan.total}</span>
-              <span>Electivas: {progress.electives.hoursCompleted}/{progress.electives.hoursNeeded} horas</span>
+              <span>Obligatorias: {progress.obligatorias.approvedCredits.toFixed(0)}/{progress.obligatorias.totalCredits.toFixed(0)} cred.</span>
+              <span>Electivas: {progress.electives.completedHours.toFixed(0)}/{progress.electives.neededHours} hs</span>
             </div>
           </div>
 
           <div className="flex flex-col items-center">
-                <div className="relative w-full md:w-32 bg-gray-200 rounded-full h-3 mb-1">
-                  <div
-                    className="absolute left-0 h-3 rounded-l-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                  {progress.electives.hoursNeeded > 0 && (
-                    <div
-                      className="absolute h-3 bg-cyan-500 rounded-r-full transition-all duration-500"
-                      style={{
-                        left: `${progressPercentage}%`,
-                        width: `${electivePercentage}%`,
-                      }}
-                    />
-                  )}
-                </div>
-            <div className="text-xs text-gray-300">
-              {progressPercentage.toFixed(1)}% completado
+            <div className="relative w-full md:w-64 bg-gray-700 rounded-full h-4 overflow-hidden flex text-white text-xs items-center justify-center">
+              {/* Obligatorias Segment */}
+              <div style={{ width: `${obligatoriasWidth}%` }} className="bg-blue-300/50 h-full">
+                <div style={{ width: `${obligatoriasProgress}%` }} className="bg-blue-500 h-full"></div>
+              </div>
+              {/* Electivas Segment */}
+              <div style={{ width: `${electivasWidth}%` }} className="bg-purple-300/50 h-full">
+                <div style={{ width: `${electivasProgress}%` }} className="bg-purple-500 h-full"></div>
+              </div>
+            </div>
+            <div className="text-xs text-gray-300 mt-1">
+              {totalProgress.toFixed(1)}% completado
             </div>
           </div>
 
