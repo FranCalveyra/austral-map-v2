@@ -5,7 +5,7 @@ import { CurriculumSchema } from '@/lib/models/curriculum';
 import planCiencia from '@/docs/planes_json/Plan_Ciencia_de_Datos_2025.json';
 import planIndustrial from '@/docs/planes_json/Plan_Ing_Industrial_2025.json';
 import planInformatico from '@/docs/planes_json/Plan_Ing_Informática_2023.json';
-import { Subject, SubjectNode, SubjectStatus } from '@/types/curriculum';
+import { SubjectNode, SubjectStatus } from '@/types/curriculum';
 import { CurriculumGraph } from '@/components/curriculum/curriculum-graph';
 import { Navbar } from '@/components/navigation/navbar';
 import { BottomBar } from '@/components/bottom-bar/bottom-bar';
@@ -46,7 +46,7 @@ export default function Home() {
       setSelectedSubject(null);
     }
   };
-  
+
   const [selectedSubject, setSelectedSubject] = useState<SubjectNode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string | undefined>(undefined);
@@ -54,7 +54,7 @@ export default function Home() {
   const updateNodesForCurrentPlan = (newNodes: SubjectNode[]) => {
     setAllPlanNodes(prev => ({ ...prev, [selectedPlan.name]: newNodes }));
   };
-  
+
   const handleGradeChange = (subjectId: string, grade: number) => {
     const newNodes = nodes.map(node => node.ID === subjectId ? { ...node, grade } : node);
     updateNodesForCurrentPlan(newNodes);
@@ -71,7 +71,7 @@ export default function Home() {
   const handleSubjectSelect = (subject: SubjectNode | null) => {
     setSelectedSubject(subject);
   };
-  
+
   const handleStatusChange = (subjectId: string, status: SubjectStatus) => {
     const updated = nodes.map(node => node.ID === subjectId ? { ...node, status } : node);
     const newNodes = updated.map(node =>
@@ -189,7 +189,7 @@ export default function Home() {
           </button>
         </div>
       )}
-      
+
       <main className="flex-1 overflow-auto pb-16">
         <CurriculumGraph
           nodes={nodes}

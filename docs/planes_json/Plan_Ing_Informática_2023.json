@@ -957,39 +957,6 @@
       "Prerequisite to Pass for":null
     },
     {
-      "Course":"Taller de Física",
-      "ID":"GIINFFISICA",
-      "Year":"Electives",
-      "Semester":null,
-      "Credits":"5.00",
-      "Prerequisites to Take":null,
-      "Prerequisites to Pass":null,
-      "Prerequisite to Take for":null,
-      "Prerequisite to Pass for":null
-    },
-    {
-      "Course":"Taller de Habilidades y Competencias",
-      "ID":"GIINFTHCOM",
-      "Year":"Electives",
-      "Semester":null,
-      "Credits":"5.00",
-      "Prerequisites to Take":null,
-      "Prerequisites to Pass":null,
-      "Prerequisite to Take for":null,
-      "Prerequisite to Pass for":null
-    },
-    {
-      "Course":"Pensamiento Computacional y Algoritmo",
-      "ID":"GIINFPCOAL",
-      "Year":"Electives",
-      "Semester":null,
-      "Credits":"5.00",
-      "Prerequisites to Take":null,
-      "Prerequisites to Pass":null,
-      "Prerequisite to Take for":null,
-      "Prerequisite to Pass for":null
-    },
-    {
       "Course":"Inteligencia Artificial Generativa",
       "ID":"GIINFIAGEN",
       "Year":"Electives",

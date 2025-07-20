@@ -49,10 +49,12 @@ export function BottomBar({
   const totalProgress = (obligatoriasProgress * obligatoriasWidth / 100) + (electivasProgress * electivasWidth / 100);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t border-gray-700 shadow-lg z-40 bg-[#21262d]">
-      <div className="flex flex-col md:flex-row flex-wrap justify-between p-4">
+    <div className="fixed bottom-0 left-0 right-0 border-t border-gray-700 shadow-lg z-40 bg-[#21262d] max-h-[20vh] overflow-y-auto">
+      <div className="flex flex-col md:flex-row items-center justify-between p-4 w-full">
+
         {/* Buttons section */}
-        <div className="flex flex-col md:flex-row flex-wrap items-start md:items-center space-y-2 md:space-y-0 md:space-x-2">
+        <div className="w-full overflow-x-auto">
+          <div className="flex flex-nowrap items-center space-x-2 py-2">
           {/* Legend toggle */}
           <button
             onClick={onToggleLegend}
@@ -92,11 +94,13 @@ export function BottomBar({
             <HelpCircle className="w-4 h-4 mr-2" />
             Acerca del Proyecto
           </button>
+          </div>
         </div>
 
-        {/* Right side - Progress */}
-        <div className="flex flex-col md:flex-row flex-wrap items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+        {/* Middle - Progress info */}
+        <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
           <div className="text-right">
+            {/* Average and counts */}
             <div className="text-sm font-medium text-white">
               {progress.averageGrade && (
                 <span className="ml-3 text-yellow-300">
@@ -105,7 +109,6 @@ export function BottomBar({
               )}
             </div>
             <div className="text-xs text-gray-300 flex space-x-4">
-              <span>Curso de Ingreso: {progress.ingress.approved}/{progress.ingress.total}</span>
               <span>Obligatorias: {progress.obligatorias.approvedCredits.toFixed(0)}/{progress.obligatorias.totalCredits.toFixed(0)} cred.</span>
               <span>Electivas: {progress.electives.completedHours.toFixed(0)}/{progress.electives.neededHours} hs</span>
             </div>
@@ -127,10 +130,11 @@ export function BottomBar({
             </div>
           </div>
 
-          {/* Developer Info moved here */}
-          <div className="flex items-center flex-shrink-0">
-            <DeveloperInfo />
-          </div>
+        {/* Right - Developer info */}
+        <div className="flex items-center flex-shrink-0">
+          <DeveloperInfo />
+        </div>
+
         </div>
       </div>
     </div>
