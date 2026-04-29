@@ -3,7 +3,7 @@
 
 ## ¡Hola! 👋
 
-Soy Francisco Calveyra, un alumno de 4to año de Ingeniería Informática en la Universidad Austral.
+Soy Francisco Calveyra, un alumno de 5to año de Ingeniería Informática en la Universidad Austral.
 
 **Austral Map** es una herramienta interactiva para visualizar y gestionar el progreso académico en la Universidad Austral, inspirada en el [FIUBA Map](https://fede.dm/FIUBA-Map/), creado por Fede Del Mazo.
 
