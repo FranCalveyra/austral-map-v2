@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Info, GraduationCap, HelpCircle, Layers } from 'lucide-react';
+import { Info, HelpCircle, Layers, ClipboardList } from 'lucide-react';
 import { DeveloperInfo } from '../navigation/developer-info';
 
 interface ProgressData {
@@ -18,8 +18,8 @@ interface BottomBarProps {
   onToggleLegend: () => void;
   showElectives: boolean;
   onToggleElectives: () => void;
-  showIngressCourse: boolean;
-  onToggleIngressCourse: () => void;
+  showOtros: boolean;
+  onToggleOtros: () => void;
   showProjectInfo: boolean;
   onToggleProjectInfo: () => void;
 }
@@ -30,8 +30,8 @@ export function BottomBar({
   onToggleLegend,
   showElectives,
   onToggleElectives,
-  showIngressCourse,
-  onToggleIngressCourse,
+  showOtros,
+  onToggleOtros,
   showProjectInfo,
   onToggleProjectInfo,
 }: BottomBarProps) {
@@ -75,14 +75,14 @@ export function BottomBar({
             Electivas
           </button>
 
-          {/* Ingress Course toggle */}
+          {/* Otros Requisitos toggle */}
           <button
-            onClick={onToggleIngressCourse}
+            onClick={onToggleOtros}
             className={`flex items-center px-3 py-2 rounded-md text-sm font-medium border transition-colors
-              ${showIngressCourse ? 'bg-gray-600 border-gray-500 text-white' : 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700'}`}
+              ${showOtros ? 'bg-gray-600 border-gray-500 text-white' : 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700'}`}
           >
-            <GraduationCap className="w-4 h-4 mr-2" />
-            Curso de Ingreso
+            <ClipboardList className="w-4 h-4 mr-2" />
+            Otros Requisitos
           </button>
 
           {/* Project Info toggle */}
@@ -139,4 +139,4 @@ export function BottomBar({
       </div>
     </div>
   );
-} 
+}

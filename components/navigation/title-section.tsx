@@ -1,17 +1,32 @@
 interface TitleSectionProps {
-  studentName?: string;
+  careerName?: string;
   planName?: string;
+  studentName?: string;
 }
 
-export function TitleSection({ studentName, planName }: TitleSectionProps) {
+export function TitleSection({ careerName, planName, studentName }: TitleSectionProps) {
+  const title = careerName ?? 'Plan de Estudios';
+
   return (
-    <div>
-      <h1 className="text-xl font-bold text-white">
-        {planName ?? 'Plan de Estudios'}
+    <div className="min-w-0">
+      <h1 className="truncate text-xl font-bold text-white">
+        {title}
       </h1>
-      <p className="text-sm text-gray-300">
-        {studentName ? `Estudiante: ${studentName}` : 'Visualizador de Plan de Estudios'}
-      </p>
+      {studentName ? (
+        <p className="truncate text-sm text-gray-300">
+          Alumno: {studentName}
+        </p>
+      ) : null}
+      {planName ? (
+        <p className="truncate text-xs text-gray-400">
+          Plan: {planName}
+        </p>
+      ) : null}
+      {!studentName && !planName ? (
+        <p className="truncate text-sm text-gray-300">
+          Visualizador de Plan de Estudios
+        </p>
+      ) : null}
     </div>
   );
-} 
+}

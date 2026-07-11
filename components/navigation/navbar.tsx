@@ -1,35 +1,46 @@
 "use client";
 
 import React from 'react';
-import { SubjectNode, SubjectStatus } from '@/types/curriculum';
+import { SubjectNode, SubjectStatus, HarvestedPlan } from '@/types/curriculum';
 import { Logo } from './logo';
 import { TitleSection } from './title-section';
-import { UploadButton } from './upload-button';
+import { ImportPlanButton } from './import-plan-button';
+import { ShareMobileButton } from './share-mobile-button';
 import { SubjectInfo } from './subject-info';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 interface NavbarProps {
   selectedSubject: SubjectNode | null;
   nodes: SubjectNode[];
   onStatusChange: (subjectId: string, status: SubjectStatus) => void;
   onGradeChange: (subjectId: string, grade: number) => void;
-  onFileUpload: (file: File) => void;
+  onImport: (plan: HarvestedPlan) => void;
+  onCreateMobileShareLink?: () => Promise<string>;
+  careerName?: string;
+  planName?: string;
   studentName?: string;
-  planOptions: string[];
-  selectedPlanName: string;
-  onPlanSelect: (planName: string) => void;
 }
 
-export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, onFileUpload, studentName, planOptions, selectedPlanName, onPlanSelect }: NavbarProps) {
+export function Navbar({
+  selectedSubject,
+  nodes,
+  onStatusChange,
+  onGradeChange,
+  onImport,
+  onCreateMobileShareLink,
+  careerName,
+  planName,
+  studentName,
+}: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <>
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between px-4 py-2 bg-[#21262d]">
         <Menu className="h-6 w-6 text-white" onClick={() => setIsOpen(true)} />
-        <div className="flex items-center space-x-2">
+        <div className="flex min-w-0 items-center space-x-2">
           <Logo className="h-6 w-6" />
-          <TitleSection studentName={studentName} />
+          <TitleSection careerName={careerName} planName={planName} studentName={studentName} />
         </div>
       </div>
       {/* Desktop Nav */}
@@ -39,34 +50,19 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
             {/* Left side - Logo, title and upload */}
             <div className="flex items-center space-x-4">
               <Logo />
-              <TitleSection studentName={studentName} />
-              <UploadButton onFileUpload={onFileUpload} />
+              <TitleSection careerName={careerName} planName={planName} studentName={studentName} />
+              <ImportPlanButton onImport={onImport} />
+              <ShareMobileButton onCreateLink={onCreateMobileShareLink} />
             </div>
 
             {/* Center - Subject info and controls */}
             <div className="flex items-center space-x-6 flex-1 justify-center px-16 pr-24">
-              <SubjectInfo 
+              <SubjectInfo
                 selectedSubject={selectedSubject}
                 nodes={nodes}
                 onStatusChange={onStatusChange}
                 onGradeChange={onGradeChange}
               />
-            </div>
-
-            {/* Right side - Contact Info */}
-            <div className="flex items-center space-x-4 flex-shrink-0">
-              <div className="relative inline-block">
-                <select
-                  value={selectedPlanName}
-                  onChange={e => onPlanSelect(e.target.value)}
-                  className="appearance-none bg-gray-800 text-white px-3 py-2 pr-8 rounded-md border border-gray-600"
-                >
-                  {planOptions.map(name => (
-                    <option key={name} value={name}>{name}</option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300" />
-              </div>
             </div>
           </div>
         </div>
@@ -83,29 +79,15 @@ export function Navbar({ selectedSubject, nodes, onStatusChange, onGradeChange, 
             {/* Scrollable content */}
             <div className="mt-4 flex-1 overflow-y-auto space-y-4">
               <Logo />
-              <TitleSection studentName={studentName} />
-              <UploadButton onFileUpload={onFileUpload} />
+              <TitleSection careerName={careerName} planName={planName} studentName={studentName} />
+              <ImportPlanButton onImport={onImport} />
+              <ShareMobileButton onCreateLink={onCreateMobileShareLink} />
               <SubjectInfo
                 selectedSubject={selectedSubject}
                 nodes={nodes}
                 onStatusChange={onStatusChange}
                 onGradeChange={onGradeChange}
               />
-              {/* Plan selector */}
-              <div className="mt-4">
-                <div className="relative inline-block w-full">
-                  <select
-                    value={selectedPlanName}
-                    onChange={e => onPlanSelect(e.target.value)}
-                    className="appearance-none bg-gray-800 text-white px-3 py-2 pr-8 rounded-md border border-gray-600 w-full"
-                  >
-                    {planOptions.map(name => (
-                      <option key={name} value={name}>{name}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300" />
-                </div>
-              </div>
             </div>
             {/* Fixed footer removed: DeveloperInfo moved to bottom bar */}
           </div>

@@ -10,6 +10,8 @@ interface SubjectNodeProps {
   onDrag: (id: string, x: number, y: number) => void;
   onClick: (subject: SubjectNode) => void;
   onDoubleClick: (subject: SubjectNode) => void;
+  zoom: number;
+  panOffset: { x: number; y: number };
   isDimmed: boolean;
   isSelected: boolean;
 }
@@ -19,21 +21,32 @@ export function SubjectNodeComponent({
   onDrag,
   onClick,
   onDoubleClick,
+  zoom,
+  panOffset,
   isDimmed,
   isSelected
 }: SubjectNodeProps) {
   const [isDragging, setIsDragging] = React.useState(false);
-  const dragStartRef = React.useRef({ x: 0, y: 0 });
-  const dragOffsetRef = React.useRef({ x: 0, y: 0 });
+  const pointerStartRef = React.useRef({ x: 0, y: 0 });
+  const dragOffsetRef = React.useRef({ y: 0 });
+  const didDragRef = React.useRef(false);
+
+  const screenYToGraphY = React.useCallback(
+    (clientY: number) => (clientY - panOffset.y) / zoom,
+    [panOffset.y, zoom]
+  );
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(true);
+    didDragRef.current = false;
+    pointerStartRef.current = { x: e.clientX, y: e.clientY };
 
-    // Calculate offset from mouse position to node position
+    // Calculate offset in graph coordinates, not screen coordinates.
+    // Otherwise zoom/pan changes make nodes jump and trigger a very rough UX.
     dragOffsetRef.current = {
-      x: e.clientX - subject.x,
-      y: e.clientY - subject.y
+      y: screenYToGraphY(e.clientY) - subject.y
     };
 
     // Immediately attach global event listeners
@@ -46,9 +59,15 @@ export function SubjectNodeComponent({
 
   const handleMouseMove = (e: MouseEvent) => {
     e.preventDefault();
+    if (
+      Math.abs(e.clientX - pointerStartRef.current.x) > 2 ||
+      Math.abs(e.clientY - pointerStartRef.current.y) > 2
+    ) {
+      didDragRef.current = true;
+    }
 
     // Only allow vertical movement - keep x position fixed
-    const newY = e.clientY - dragOffsetRef.current.y;
+    const newY = screenYToGraphY(e.clientY) - dragOffsetRef.current.y;
     onDrag(subject.ID, subject.x, newY);
   };
 
@@ -117,15 +136,13 @@ export function SubjectNodeComponent({
     }
   };
 
-  // Identify annual subjects (Semester null) but not electives
-  const isAnnual = subject.Semester === null && !subject.isElective;
-  const widthClass = isAnnual ? 'w-[430px]' : NODE_WIDTH_CLASS; // 430px spans across two semesters (180px + 250px column gap)
+  const isAnnual = Boolean(subject.isAnnual);
 
   return (
     <div
       className={cn(
         'absolute select-none cursor-move rounded-2xl border-2 p-3 transition-all duration-75 flex flex-col items-center justify-center',
-        widthClass,
+        !isAnnual && NODE_WIDTH_CLASS,
         NODE_HEIGHT_CLASS,
         getNodeColor(),
         getOpacity(),
@@ -135,22 +152,23 @@ export function SubjectNodeComponent({
       style={{
         left: subject.x,
         top: subject.y,
+        width: isAnnual ? subject.width : undefined,
         transform: isDragging ? 'rotate(1deg)' : 'rotate(0deg)',
         zIndex: isDragging ? 50 : 10,
         willChange: isDragging ? 'transform' : 'auto'
       }}
       onMouseDown={handleMouseDown}
       onClick={(e) => {
-        if (!isDragging) {
-          e.stopPropagation();
-          onClick(subject);
+        e.stopPropagation();
+        if (didDragRef.current) {
+          didDragRef.current = false;
+          return;
         }
+        onClick(subject);
       }}
       onDoubleClick={(e) => {
-        if (!isDragging) {
-          e.stopPropagation();
-          onDoubleClick(subject);
-        }
+        e.stopPropagation();
+        if (!didDragRef.current) onDoubleClick(subject);
       }}
     >
       <div className="text-sm font-semibold leading-tight text-center">

@@ -131,7 +131,9 @@ export function SubjectInfo({ selectedSubject, nodes, onStatusChange, onGradeCha
                 ? 'Electiva'
                 : selectedSubject.Year === 0
                 ? 'Curso de Ingreso'
-                : `Año ${selectedSubject.Year}${selectedSubject.Semester ? `, Cuatrimestre ${selectedSubject.Semester}` : ' (ANUAL)'}`
+                : selectedSubject.Year === 'Otros'
+                ? 'Otros Requisitos'
+                : `Año ${selectedSubject.Year}`
               }
             </span>
             <span>ID: {selectedSubject.ID}</span>

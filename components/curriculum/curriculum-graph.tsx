@@ -2,11 +2,11 @@
 
 import React, { useCallback } from 'react';
 import { SubjectNode, Connection, SubjectStatus } from '@/types/curriculum';
-import { getConnections } from '@/lib/curriculum-parser';
+import { getConnections, getColumns, LAYOUT } from '@/lib/curriculum-parser';
 import { SubjectNodeComponent } from './subject-node';
 import { Connections } from './connection/connections';
 import { Legend } from './legend/legend';
-import { NODE_WIDTH_CLASS, NODE_HEIGHT_CLASS } from '../constants';
+import { NODE_HEIGHT_CLASS } from '../constants';
 
 
 interface CurriculumGraphProps {
@@ -14,17 +14,18 @@ interface CurriculumGraphProps {
   selectedSubject: SubjectNode | null;
   showLegend: boolean;
   showElectives: boolean;
-  showIngressCourse: boolean;
+  showOtros: boolean;
+  fitRevision: number;
   onSubjectSelect: (subject: SubjectNode | null) => void;
   onDrag: (id: string, x: number, y: number) => void;
   onStatusChange: (subjectId: string, status: SubjectStatus) => void;
 }
 
-export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElectives, showIngressCourse, onSubjectSelect, onDrag, onStatusChange }: CurriculumGraphProps) {
+export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElectives, showOtros, fitRevision, onSubjectSelect, onDrag, onStatusChange }: CurriculumGraphProps) {
   // Same layout constants as in parser
-  const startX = 100;
-  const columnWidth = 250;
-  const nodeHeight = 120;
+  const startX = LAYOUT.startX;
+  const columnWidth = LAYOUT.columnWidth;
+  const nodeHeight = LAYOUT.nodeHeight;
   
   // Zoom and pan state
   const [zoom, setZoom] = React.useState(1);
@@ -34,6 +35,7 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
   const [isPanning, setIsPanning] = React.useState(false);
   const [lastPanPoint, setLastPanPoint] = React.useState({ x: 0, y: 0 });
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const lastAutoFitSignatureRef = React.useRef<string | null>(null);
 
   // Filter nodes based on display settings
   const coreNodes = React.useMemo(() => {
@@ -41,49 +43,53 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
       // Exclude electives from main graph unless toggled on
       if (node.isElective && !showElectives) return false;
 
-      // Filter ingress course (Year 0) based on toggle
-      if (!showIngressCourse && node.Year === 0) return false;
+      // El curso de ingreso no forma parte de la estructura real del mapa.
+      if (node.Year === 0) return false;
+
+      // Filter "Otros Requisitos" (Year 'Otros') based on toggle
+      if (!showOtros && node.Year === 'Otros') return false;
 
       return true;
     });
     return filtered;
-  }, [nodes, showIngressCourse, showElectives]);
+  }, [nodes, showElectives, showOtros]);
 
-  const electiveHeaderPosition = React.useMemo(() => {
-    if (!showElectives) return { visible: false, left: 0 };
-    
-    const electiveNodes = coreNodes.filter(node => node.isElective);
-    if (electiveNodes.length === 0) return { visible: false, left: 0 };
+  // Columnas desde el set COMPLETO (misma fuente que el parser para asignar la x),
+  // así los headers quedan siempre alineados con los nodos aunque se togglee una columna.
+  const allColumns = React.useMemo(() => getColumns(nodes), [nodes]);
+  const columns = React.useMemo(
+    () =>
+      allColumns.filter((c) => {
+        if (c.key === 'ingreso') return false;
+        if (c.key === 'otros') return showOtros;
+        if (c.key === 'electives') return showElectives;
+        return true;
+      }),
+    [allColumns, showOtros, showElectives]
+  );
 
-    const planNodes = coreNodes.filter(node => !node.isElective && node.Year !== 0 && typeof node.Year === 'number');
-    const maxYear = planNodes.length > 0 ? Math.max(...planNodes.map(node => node.Year as number)) : 0;
-    
-    const electiveStartColumnIndex = 1 + maxYear * 2;
-    const numSlotsPerColumn = 6;
-    const numElectiveColumns = Math.ceil(electiveNodes.length / numSlotsPerColumn);
-    
-    const electiveBlockStartX = startX + electiveStartColumnIndex * columnWidth;
-    const electiveColumnsTotalWidth = (numElectiveColumns * columnWidth) - (columnWidth - 180); // Adjust for the last column not having a full gap
-    
-    const leftPosition = electiveBlockStartX + (electiveColumnsTotalWidth / 2) - (180 / 2);
-
-    return { visible: true, left: leftPosition };
-  }, [coreNodes, showElectives, startX, columnWidth]);
+  const autoFitSignature = React.useMemo(
+    () => String(fitRevision),
+    [fitRevision]
+  );
 
   // Auto-fit view: compute zoom and panOffset to show all nodes
   React.useLayoutEffect(() => {
     if (!containerRef.current || coreNodes.length === 0) return;
+    if (lastAutoFitSignatureRef.current === autoFitSignature) return;
+
     const containerRect = containerRef.current.getBoundingClientRect();
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     coreNodes.forEach(node => {
-      // Determine node width: annual subjects are wider; electives and regular use standard width
-      const width = (node.Semester === null && !node.isElective) ? 430 : 180;
+      const width = node.width ?? LAYOUT.nodeWidth;
       const height = nodeHeight;
       minX = Math.min(minX, node.x);
       maxX = Math.max(maxX, node.x + width);
       minY = Math.min(minY, node.y);
       maxY = Math.max(maxY, node.y + height);
     });
+    // Incluir la banda de headers de columna (arriba de los nodos) para que no se corte.
+    minY = Math.min(minY, 8);
     const contentWidth = maxX - minX;
     const contentHeight = maxY - minY;
     // Add padding around content
@@ -96,7 +102,8 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
     const offsetX = -minX * fitZoom + (containerRect.width - contentWidth * fitZoom) / 2;
     const offsetY = -minY * fitZoom + (containerRect.height - contentHeight * fitZoom) / 2;
     setPanOffset({ x: offsetX, y: offsetY });
-  }, [coreNodes]);
+    lastAutoFitSignatureRef.current = autoFitSignature;
+  }, [autoFitSignature, coreNodes, nodeHeight]);
 
   // Trigger fade-in after initial layout
   React.useEffect(() => {
@@ -262,19 +269,6 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
     return set;
   }, [selectedSubject, reducedConnections]);
 
-  // Get unique semesters for column headers based on core nodes (exclude annual subjects)
-  const semesters = Array.from(new Set(
-    coreNodes
-      .filter(node => node.Semester !== null) // Exclude annual subjects
-      .map(node => `${node.Year}-${node.Semester}`)
-  ))
-    .sort((a, b) => {
-      const [yearA, semA] = a.split('-').map(Number);
-      const [yearB, semB] = b.split('-').map(Number);
-      if (yearA !== yearB) return yearA - yearB;
-      return semA - semB;
-    });
-
   return (
     <div
       ref={containerRef}
@@ -308,59 +302,32 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
         }}
       />
       
-      {/* Column headers positioned above each cuatrimestre */}
+      {/* Column headers — cada año puede contener 1er y 2do cuatrimestre */}
       <div className="absolute top-4 left-0 right-0 z-10 pointer-events-none">
-        {/* Ingress course header */}
-        {showIngressCourse && (
-          <div className="absolute" style={{ left: startX + (columnWidth - 180) / 2, width: 180 }}>
-            <div className={`bg-orange-50 rounded-lg shadow-md border border-orange-200 p-3 ${NODE_WIDTH_CLASS} ${NODE_HEIGHT_CLASS} flex items-center justify-center`}>
-              <div className="font-semibold text-orange-800 text-center">
-                Curso de Ingreso
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Regular semester headers */}
-        {semesters.map((semester) => {
-          const [year, sem] = semester.split('-').map(Number);
-          // Skip Year 0 (ingress course) as it's handled separately
-          if (year === 0) return null;
-          
-          // Compute cuatrimestre label
-          const ordinals = ['', '1er', '2do', '3er', '4to', '5to', '6to', '7mo', '8vo', '9no', '10mo'];
-          const cuatriIndex = (year - 1) * 2 + sem;
-          const cuatriLabel = `${ordinals[cuatriIndex]} Cuatrimestre`;
-          // Match the x offset from calculateLayout (add 1 column for ingress course)
-          const columnIndex = 1 + (year - 1) * 2 + (sem - 1);
-          const x = startX + columnIndex * columnWidth;
+        {columns.map((col) => {
+          const x = startX + col.index * columnWidth;
+          const style =
+            col.key === 'ingreso'
+              ? 'bg-orange-50 border-orange-200 text-orange-800'
+              : col.key === 'electives'
+              ? 'border-cyan-500 text-cyan-400'
+              : col.key === 'otros'
+              ? 'border-purple-500 text-purple-300'
+              : 'border-gray-600 text-white';
+          const bg = col.key === 'ingreso' ? undefined : '#21262d';
+          const isYear = col.key.startsWith('y');
           return (
-            <div
-              key={semester}
-              className="absolute"
-              style={{ left: x }}
-            >
-                          <div className={`rounded-lg shadow-md border border-gray-600 p-3 ${NODE_WIDTH_CLASS} ${NODE_HEIGHT_CLASS} flex items-center justify-center`} style={{ backgroundColor: '#21262d' }}>
-              <div className="font-semibold text-white">
-                  {cuatriLabel}
-                </div>
+            <div key={col.key} className="absolute" style={{ left: x }}>
+              <div
+                className={`rounded-lg shadow-md border p-3 ${NODE_HEIGHT_CLASS} flex flex-col items-center justify-center ${style}`}
+                style={{ ...(bg ? { backgroundColor: bg } : {}), width: isYear ? LAYOUT.annualNodeWidth : LAYOUT.nodeWidth }}
+              >
+                <div className="font-semibold text-center">{col.label}</div>
+                {isYear && <div className="mt-1 text-xs font-normal opacity-70">1er cuatri · 2do cuatri</div>}
               </div>
             </div>
           );
         })}
-        {/* Electives header */}
-        {electiveHeaderPosition.visible && (
-          <div className="absolute" style={{ left: electiveHeaderPosition.left }}>
-            <div
-              className={`rounded-lg shadow-md border border-cyan-500 p-3 ${NODE_WIDTH_CLASS} ${NODE_HEIGHT_CLASS} flex items-center justify-center`}
-              style={{ backgroundColor: '#21262d' }}
-            >
-              <div className="font-semibold text-cyan-400 text-center">
-                Electivas
-              </div>
-            </div>
-          </div>
-        )}
       </div>
       
       {/* Connections */}
@@ -377,6 +344,8 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
             onDrag={onDrag}
             onClick={handleSubjectClick}
             onDoubleClick={handleSubjectDoubleClick}
+            zoom={zoom}
+            panOffset={panOffset}
             isDimmed={isDimmed}
             isSelected={isSelected}
           />

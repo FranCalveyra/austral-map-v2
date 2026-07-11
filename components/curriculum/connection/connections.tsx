@@ -4,7 +4,6 @@ import React from 'react';
 import { SubjectNode, Connection } from '@/types/curriculum';
 
 // Numeric node size for centering arrows
-const NODE_WIDTH = 180;
 const NODE_HEIGHT = 60;
 
 interface ConnectionsProps {
@@ -23,7 +22,7 @@ export function Connections({ nodes, connections, selectedSubject }: Connections
     const node = nodes.find(n => n.ID === nodeId);
     if (!node) return { x: 0, y: 0 };
     return {
-      x: node.x + NODE_WIDTH / 2,
+      x: node.x + (node.width ?? 180) / 2,
       y: node.y + NODE_HEIGHT / 2
     };
   };
@@ -67,7 +66,7 @@ export function Connections({ nodes, connections, selectedSubject }: Connections
   };
 
   // Determine SVG bounding box to include all nodes
-  const nodeWidth = 200;
+  const nodeWidth = 420;
   const nodeHeight = 100;
   const maxX = nodes.length ? Math.max(...nodes.map(n => n.x)) + nodeWidth : 0;
   const maxY = nodes.length ? Math.max(...nodes.map(n => n.y)) + nodeHeight : 0;
