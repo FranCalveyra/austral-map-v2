@@ -1,4 +1,183 @@
-import { HarvestedPlan, HarvestedPrereq, SharedPlanPayload, Subject } from '@/types/curriculum';
+import {
+  HarvestedPlan,
+  HarvestedPrereq,
+  SharedPlanPayload,
+  Subject,
+  SubjectNode,
+  SubjectStatus,
+  UserNodeState,
+} from '@/types/curriculum';
+import { buildCurriculum } from '@/lib/curriculum-parser';
+
+const STATUS_CODES: SubjectStatus[] = [
+  'DISPONIBLE',
+  'NO_DISPONIBLE',
+  'CURSANDO',
+  'EN_FINAL',
+  'DESAPROBADA',
+  'APROBADA',
+];
+
+type CompactPrerequisite = [string, 0 | 1, number?];
+type CompactSubject = [
+  string,
+  string,
+  string | null,
+  string,
+  number | 'E' | null,
+  string | null,
+  string | null,
+  string | null,
+  CompactPrerequisite[],
+  CompactPrerequisite[],
+  CompactPrerequisite[]?,
+  CompactPrerequisite[]?
+];
+
+type CompactSharedPlanPayload = {
+  v: 2;
+  m?: Array<string | number | null>;
+  s: CompactSubject[];
+  u?: Record<string, [number | null, number | null, number | null, number | null]>;
+};
+
+function compactPrerequisites(prerequisites: HarvestedPrereq[] | undefined): CompactPrerequisite[] {
+  return (prerequisites ?? []).map((prerequisite) => [
+    prerequisite.id,
+    prerequisite.condition === 'Regularizada' ? 0 : 1,
+    prerequisite.option,
+  ]);
+}
+
+function expandPrerequisites(prerequisites: CompactPrerequisite[] | undefined): HarvestedPrereq[] {
+  return (prerequisites ?? []).map(([id, condition, option]) => ({
+    id,
+    condition: condition === 0 ? 'Regularizada' : 'Aprobada',
+    ...(typeof option === 'number' ? { option } : {}),
+  }));
+}
+
+/**
+ * Compacta el link compartido sin perder información: las claves repetidas se
+ * reemplazan por posiciones y el estado default del mapa no viaja.
+ */
+export function createCompactSharedPlanPayload(
+  plan: HarvestedPlan,
+  nodes: SubjectNode[]
+): CompactSharedPlanPayload {
+  const defaultNodes = new Map(buildCurriculum(plan).map((node) => [node.ID, node]));
+  const userChanges: CompactSharedPlanPayload['u'] = {};
+
+  for (const node of nodes) {
+    const initial = defaultNodes.get(node.ID);
+    if (!initial) continue;
+
+    const status = node.status === initial.status ? null : STATUS_CODES.indexOf(node.status);
+    const grade = node.grade == null ? null : node.grade;
+    const x = node.x === initial.x ? null : node.x;
+    const y = node.y === initial.y ? null : node.y;
+    if (status !== null || grade !== null || x !== null || y !== null) {
+      userChanges[node.ID] = [status, grade, x, y];
+    }
+  }
+
+  const meta = plan.meta;
+  return {
+    v: 2,
+    ...(meta
+      ? {
+          m: [
+            meta.source ?? null,
+            meta.generatedAt ?? null,
+            meta.studentName ?? null,
+            meta.careerName ?? null,
+            meta.planName ?? null,
+            meta.propuesta ?? null,
+            meta.encabezado ?? null,
+            meta.electiveHoursRequired ?? null,
+          ],
+        }
+      : {}),
+    s: plan.subjects.map((subject) => [
+      subject.course,
+      subject.id,
+      subject.type ?? null,
+      subject.module,
+      subject.year === 'Electives' ? 'E' : subject.year,
+      subject.credits,
+      subject.nota,
+      subject.origen,
+      compactPrerequisites(subject.prerequisitesToTake),
+      compactPrerequisites(subject.prerequisitesToPass),
+      compactPrerequisites(subject.prerequisiteToTakeFor),
+      compactPrerequisites(subject.prerequisiteToPassFor),
+    ]),
+    ...(Object.keys(userChanges).length > 0 ? { u: userChanges } : {}),
+  };
+}
+
+function expandCompactSharedPlanPayload(data: unknown): PlanImportBundle {
+  const compact = data as Partial<CompactSharedPlanPayload>;
+  if (compact.v !== 2 || !Array.isArray(compact.s)) {
+    throw new Error('El link compartido no tiene la forma esperada.');
+  }
+
+  const meta = compact.m ?? [];
+  const plan: HarvestedPlan = {
+    ...(compact.m
+      ? {
+          meta: {
+            source: typeof meta[0] === 'string' ? meta[0] : undefined,
+            generatedAt: typeof meta[1] === 'string' ? meta[1] : undefined,
+            studentName: typeof meta[2] === 'string' ? meta[2] : null,
+            careerName: typeof meta[3] === 'string' ? meta[3] : null,
+            planName: typeof meta[4] === 'string' ? meta[4] : null,
+            propuesta: typeof meta[5] === 'string' ? meta[5] : null,
+            encabezado: typeof meta[6] === 'string' ? meta[6] : null,
+            electiveHoursRequired: typeof meta[7] === 'number' ? meta[7] : null,
+          },
+        }
+      : {}),
+    subjects: compact.s.map((subject) => {
+      const [course, id, type, module, year, credits, nota, origen, take, pass, takeFor, passFor] = subject;
+      if (typeof course !== 'string' || typeof id !== 'string' || typeof module !== 'string') {
+        throw new Error('El link compartido contiene una materia inválida.');
+      }
+      return {
+        course,
+        id,
+        ...(typeof type === 'string' ? { type } : {}),
+        module,
+        year: year === 'E' ? 'Electives' : year,
+        credits: typeof credits === 'string' ? credits : null,
+        nota: typeof nota === 'string' ? nota : null,
+        origen: typeof origen === 'string' ? origen : null,
+        prerequisitesToTake: expandPrerequisites(take),
+        prerequisitesToPass: expandPrerequisites(pass),
+        prerequisiteToTakeFor: expandPrerequisites(takeFor),
+        prerequisiteToPassFor: expandPrerequisites(passFor),
+      };
+    }),
+  };
+
+  const nodes: Record<string, UserNodeState> = {};
+  for (const [id, change] of Object.entries(compact.u ?? {})) {
+    const [status, grade, x, y] = change;
+    nodes[id] = {
+      ...(typeof status === 'number' && STATUS_CODES[status] ? { status: STATUS_CODES[status] } : {}),
+      ...(typeof grade === 'number' ? { grade } : {}),
+      ...(typeof x === 'number' ? { x } : {}),
+      ...(typeof y === 'number' ? { y } : {}),
+    };
+  }
+
+  return {
+    plan,
+    ...(Object.keys(nodes).length > 0
+      ? { userState: { version: 1, updatedAt: new Date().toISOString(), nodes } }
+      : {}),
+  };
+}
 
 function parseLegacyPrereqList(raw: string | null): HarvestedPrereq[] {
   if (!raw) return [];
@@ -127,6 +306,9 @@ export async function readPlanFromHash(): Promise<PlanImportBundle | null> {
     const bundle = sharedMatch
       ? (() => {
           return decodeCompressedJson(sharedMatch[1]).then((data) => {
+            if ((data as { v?: unknown })?.v === 2) {
+              return expandCompactSharedPlanPayload(data);
+            }
             const shared = coerceSharedPlanPayload(data);
             return { plan: shared.plan, userState: shared.userState };
           });

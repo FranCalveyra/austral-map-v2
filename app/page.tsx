@@ -13,7 +13,12 @@ import { Navbar } from '@/components/navigation/navbar';
 import { BottomBar } from '@/components/bottom-bar/bottom-bar';
 import { ProjectInfoModal } from '@/components/modals/project-info-modal';
 import { calculateSubjectStatus, buildCurriculum } from '@/lib/curriculum-parser';
-import { coercePlan, encodeCompressedJson, readPlanFromHash } from '@/lib/plan-import';
+import {
+  coercePlan,
+  createCompactSharedPlanPayload,
+  encodeCompressedJson,
+  readPlanFromHash,
+} from '@/lib/plan-import';
 
 const PLAN_STORAGE_KEY = 'austral-map:plan';
 const USER_STATE_STORAGE_KEY = 'austral-map:user-state';
@@ -287,15 +292,7 @@ export default function Home() {
       throw new Error('Primero importá un plan para poder compartirlo.');
     }
 
-    const payload: SharedPlanPayload = {
-      version: 1,
-      plan: currentPlan,
-      userState: {
-        version: 1,
-        updatedAt: new Date().toISOString(),
-        nodes: buildPersistedNodeState(nodes),
-      },
-    };
+    const payload = createCompactSharedPlanPayload(currentPlan, nodes);
     const encoded = await encodeCompressedJson(payload);
     const configuredOrigin = process.env.NEXT_PUBLIC_SHARE_ORIGIN?.replace(/\/$/, '');
     const shareOrigin = configuredOrigin || window.location.origin;

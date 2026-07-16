@@ -7,6 +7,7 @@ import { SubjectNodeComponent } from './subject-node';
 import { Connections } from './connection/connections';
 import { Legend } from './legend/legend';
 import { NODE_HEIGHT_CLASS } from '../constants';
+import { Minus, Plus } from 'lucide-react';
 
 
 interface CurriculumGraphProps {
@@ -37,6 +38,37 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
   const [viewportRevision, setViewportRevision] = React.useState(0);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const lastAutoFitSignatureRef = React.useRef<string | null>(null);
+  const zoomRef = React.useRef(1);
+  const panOffsetRef = React.useRef({ x: 0, y: 0 });
+  const pinchRef = React.useRef<{
+    distance: number;
+    zoom: number;
+  } | null>(null);
+
+  const clampZoom = (value: number) => Math.min(Math.max(0.5, value), 3);
+
+  const applyZoomAt = useCallback((requestedZoom: number, clientX: number, clientY: number) => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const focalX = clientX - rect.left;
+    const focalY = clientY - rect.top;
+    const previousZoom = zoomRef.current;
+    const nextZoom = clampZoom(requestedZoom);
+    const previousPan = panOffsetRef.current;
+    const graphX = (focalX - previousPan.x) / previousZoom;
+    const graphY = (focalY - previousPan.y) / previousZoom;
+    const nextPan = {
+      x: focalX - graphX * nextZoom,
+      y: focalY - graphY * nextZoom,
+    };
+
+    zoomRef.current = nextZoom;
+    panOffsetRef.current = nextPan;
+    setZoom(nextZoom);
+    setPanOffset(nextPan);
+  }, []);
 
   // The graph owns its viewport. Recalculate when a phone rotates or a tablet
   // changes split-screen size; relying only on the initial fit leaves the map
@@ -115,6 +147,7 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
     // deliberately expose panning instead of turning the map into a thumbnail.
     const isCompactViewport = containerRect.width < 1024;
     const fitZoom = isCompactViewport ? Math.max(naturalFitZoom, 0.68) : naturalFitZoom;
+    zoomRef.current = fitZoom;
     setZoom(fitZoom);
     // On phones/tablets start from the first year. Centering a wide plan lands
     // users in the middle of the curriculum without context.
@@ -122,7 +155,9 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
       ? 16 - minX * fitZoom
       : -minX * fitZoom + (containerRect.width - contentWidth * fitZoom) / 2;
     const offsetY = -minY * fitZoom + (containerRect.height - contentHeight * fitZoom) / 2;
-    setPanOffset({ x: offsetX, y: offsetY });
+    const nextPanOffset = { x: offsetX, y: offsetY };
+    panOffsetRef.current = nextPanOffset;
+    setPanOffset(nextPanOffset);
     lastAutoFitSignatureRef.current = autoFitSignature;
   }, [autoFitSignature, coreNodes, nodeHeight]);
 
@@ -202,10 +237,9 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
     if (!selectedSubject) {
       e.preventDefault();
       const delta = e.deltaY * -0.001;
-      const newZoom = Math.min(Math.max(0.5, zoom + delta), 3);
-      setZoom(newZoom);
+      applyZoomAt(zoomRef.current + delta, e.clientX, e.clientY);
     }
-  }, [zoom, selectedSubject]);
+  }, [applyZoomAt, selectedSubject]);
 
   // Handle mouse events for panning (only when no subject is selected)
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -219,10 +253,12 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
     if (isPanning) {
       const deltaX = e.clientX - lastPanPoint.x;
       const deltaY = e.clientY - lastPanPoint.y;
-      setPanOffset(prev => ({
-        x: prev.x + deltaX,
-        y: prev.y + deltaY
-      }));
+      const nextPanOffset = {
+        x: panOffsetRef.current.x + deltaX,
+        y: panOffsetRef.current.y + deltaY,
+      };
+      panOffsetRef.current = nextPanOffset;
+      setPanOffset(nextPanOffset);
       setLastPanPoint({ x: e.clientX, y: e.clientY });
     }
   }, [isPanning, lastPanPoint]);
@@ -231,8 +267,19 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
     setIsPanning(false);
   }, []);
 
-  // Handle touch events for panning on mobile
+  // Pinch zoom and one-finger pan are handled explicitly because touch-none
+  // disables the browser's native page zoom inside the map.
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      setIsPanning(false);
+      const [first, second] = [e.touches[0], e.touches[1]];
+      pinchRef.current = {
+        distance: Math.hypot(second.clientX - first.clientX, second.clientY - first.clientY),
+        zoom: zoomRef.current,
+      };
+      return;
+    }
     if (!selectedSubject && e.touches.length === 1) {
       setIsPanning(true);
       setLastPanPoint({ x: e.touches[0].clientX, y: e.touches[0].clientY });
@@ -240,20 +287,39 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
   }, [selectedSubject]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && pinchRef.current) {
+      e.preventDefault();
+      const [first, second] = [e.touches[0], e.touches[1]];
+      const distance = Math.hypot(second.clientX - first.clientX, second.clientY - first.clientY);
+      const centerX = (first.clientX + second.clientX) / 2;
+      const centerY = (first.clientY + second.clientY) / 2;
+      applyZoomAt(pinchRef.current.zoom * (distance / pinchRef.current.distance), centerX, centerY);
+      return;
+    }
     if (isPanning && e.touches.length === 1) {
+      e.preventDefault();
       const deltaX = e.touches[0].clientX - lastPanPoint.x;
       const deltaY = e.touches[0].clientY - lastPanPoint.y;
-      setPanOffset(prev => ({
-        x: prev.x + deltaX,
-        y: prev.y + deltaY
-      }));
+      const nextPanOffset = {
+        x: panOffsetRef.current.x + deltaX,
+        y: panOffsetRef.current.y + deltaY,
+      };
+      panOffsetRef.current = nextPanOffset;
+      setPanOffset(nextPanOffset);
       setLastPanPoint({ x: e.touches[0].clientX, y: e.touches[0].clientY });
     }
-  }, [isPanning, lastPanPoint]);
+  }, [applyZoomAt, isPanning, lastPanPoint]);
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length < 2) pinchRef.current = null;
     setIsPanning(false);
   }, []);
+
+  const changeZoom = useCallback((delta: number) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    applyZoomAt(zoomRef.current + delta, rect.left + rect.width / 2, rect.top + rect.height / 2);
+  }, [applyZoomAt]);
 
   // Set up global mouse event listeners
   React.useEffect(() => {
@@ -301,6 +367,7 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
     >
       <div
         className="w-full h-full"
@@ -376,10 +443,26 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
       </div>
       
       {/* Zoom Indicator */}
-      <div className="fixed bottom-[calc(20vh+1rem)] right-4 z-50 lg:bottom-24">
-        <div className="bg-gray-800 border border-gray-600 text-white px-3 py-2 rounded-lg text-sm font-medium">
+      <div className="fixed bottom-[calc(20vh+1rem)] right-4 z-50 flex items-center overflow-hidden rounded-lg border border-gray-600 bg-gray-800 text-white lg:bottom-24">
+        <button
+          type="button"
+          aria-label="Alejar mapa"
+          onClick={() => changeZoom(-0.15)}
+          className="p-2 hover:bg-gray-700"
+        >
+          <Minus className="h-4 w-4" />
+        </button>
+        <div className="border-x border-gray-600 px-2 py-2 text-sm font-medium">
           {Math.round(zoom * 100)}%
         </div>
+        <button
+          type="button"
+          aria-label="Acercar mapa"
+          onClick={() => changeZoom(0.15)}
+          className="p-2 hover:bg-gray-700"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
       </div>
       
       {/* Legend - Fixed position */}
