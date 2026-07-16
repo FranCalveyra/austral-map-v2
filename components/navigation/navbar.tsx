@@ -36,7 +36,7 @@ export function Navbar({
   return (
     <>
       {/* Mobile Top Bar */}
-      <div className="md:hidden flex items-center justify-between px-4 py-2 bg-[#21262d]">
+      <div className="lg:hidden flex items-center justify-between px-2 py-2 bg-[#21262d]">
         <Menu className="h-6 w-6 text-white" onClick={() => setIsOpen(true)} />
         <div className="flex min-w-0 items-center space-x-2">
           <Logo className="h-6 w-6" />
@@ -44,7 +44,7 @@ export function Navbar({
         </div>
       </div>
       {/* Desktop Nav */}
-      <nav className="hidden md:flex w-full border-b border-gray-700 shadow-sm overflow-x-auto" style={{ backgroundColor: '#21262d' }}>
+      <nav className="hidden lg:flex w-full border-b border-gray-700 shadow-sm overflow-x-auto" style={{ backgroundColor: '#21262d' }}>
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Left side - Logo, title and upload */}

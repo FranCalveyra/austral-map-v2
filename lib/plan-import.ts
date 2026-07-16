@@ -112,6 +112,10 @@ function coerceSharedPlanPayload(data: unknown): SharedPlanPayload {
 /**
  * Lee el plan del hash de la URL si viene del bookmarklet: #plan=<gzip+base64>.
  * Devuelve null si no hay nada. Limpia el hash tras leerlo.
+ *
+ * Si el hash existe pero está incompleto o corrupto, informa el error al
+ * llamador: caer silenciosamente al estado vacío hacía imposible entender por
+ * qué un link recibido en el celular no mostraba el plan.
  */
 export async function readPlanFromHash(): Promise<PlanImportBundle | null> {
   if (typeof window === 'undefined') return null;
@@ -134,6 +138,8 @@ export async function readPlanFromHash(): Promise<PlanImportBundle | null> {
     return result;
   } catch (e) {
     console.error('No se pudo decodificar el plan del link:', e);
-    return null;
+    throw new Error(
+      'No pude importar el plan de este link. Verificá que se haya copiado completo y volvé a probar.'
+    );
   }
 }

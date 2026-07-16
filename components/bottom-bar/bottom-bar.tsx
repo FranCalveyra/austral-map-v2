@@ -50,7 +50,7 @@ export function BottomBar({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 border-t border-gray-700 shadow-lg z-40 bg-[#21262d] max-h-[20vh] overflow-y-auto">
-      <div className="flex flex-col md:flex-row items-center justify-between p-4 w-full">
+      <div className="flex flex-col lg:flex-row items-center justify-between p-3 lg:p-4 w-full">
 
         {/* Buttons section */}
         <div className="w-full overflow-x-auto">
@@ -98,7 +98,7 @@ export function BottomBar({
         </div>
 
         {/* Middle - Progress info */}
-        <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
+        <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-4">
           <div className="text-right">
             {/* Average and counts */}
             <div className="text-sm font-medium text-white">
@@ -115,7 +115,7 @@ export function BottomBar({
           </div>
 
           <div className="flex flex-col items-center">
-            <div className="relative w-full md:w-64 bg-gray-700 rounded-full h-4 overflow-hidden flex text-white text-xs items-center justify-center">
+            <div className="relative w-full lg:w-64 bg-gray-700 rounded-full h-4 overflow-hidden flex text-white text-xs items-center justify-center">
               {/* Obligatorias Segment */}
               <div style={{ width: `${obligatoriasWidth}%` }} className="bg-blue-300/50 h-full">
                 <div style={{ width: `${obligatoriasProgress}%` }} className="bg-blue-500 h-full"></div>

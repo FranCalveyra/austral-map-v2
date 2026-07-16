@@ -184,20 +184,25 @@ export default function Home() {
   // Carga inicial: primero el hash (bookmarklet), después localStorage.
   useEffect(() => {
     (async () => {
-      const fromHash = await readPlanFromHash();
-      if (fromHash) {
-        loadPlan(fromHash.plan, fromHash.userState);
-      } else {
-        const stored = localStorage.getItem(PLAN_STORAGE_KEY);
-        if (stored) {
-          try {
-            loadPlan(JSON.parse(stored));
-          } catch {
-            /* ignore */
+      try {
+        const fromHash = await readPlanFromHash();
+        if (fromHash) {
+          loadPlan(fromHash.plan, fromHash.userState);
+        } else {
+          const stored = localStorage.getItem(PLAN_STORAGE_KEY);
+          if (stored) {
+            try {
+              loadPlan(JSON.parse(stored));
+            } catch {
+              /* ignore */
+            }
           }
         }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'No pude importar el plan compartido.');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     })();
   }, [loadPlan]);
 
@@ -292,7 +297,9 @@ export default function Home() {
       },
     };
     const encoded = await encodeCompressedJson(payload);
-    return `${window.location.origin}${window.location.pathname}#share=${encoded}`;
+    const configuredOrigin = process.env.NEXT_PUBLIC_SHARE_ORIGIN?.replace(/\/$/, '');
+    const shareOrigin = configuredOrigin || window.location.origin;
+    return `${shareOrigin}${window.location.pathname}#share=${encoded}`;
   }, [currentPlan, nodes]);
 
   return (
@@ -330,7 +337,7 @@ export default function Home() {
         </div>
       )}
 
-      <main className="flex-1 overflow-auto pb-44 md:pb-16">
+      <main className="flex-1 overflow-hidden pb-[calc(20vh+1rem)] lg:pb-16">
         {hasPlan ? (
           <CurriculumGraph
             nodes={nodes}

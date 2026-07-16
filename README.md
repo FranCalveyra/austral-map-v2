@@ -58,9 +58,11 @@ Si reimportás el mismo plan, Austral Map intenta conservar tus cambios locales.
 
 El flujo recomendado para teléfono es importar primero el plan en una computadora y después usar **Pasar al celular**.
 
-Ese botón genera un link privado que incluye tu plan y tus cambios locales: estados, notas y posiciones movidas. Podés compartirlo con el menú nativo del sistema o copiarlo y mandártelo por WhatsApp, AirDrop, mail o Notas.
+Ese botón genera un link privado que incluye tu plan y tus cambios locales: estados, notas y posiciones movidas. Cuando el plan entra en un QR estándar, también muestra un código para escanear. Podés compartir el link con el menú nativo del sistema o copiarlo y mandártelo por WhatsApp, AirDrop, mail o Notas.
 
-Al abrir ese link en el teléfono, Austral Map carga el mismo plan y guarda una copia local en ese navegador.
+Al abrir ese link completo en el teléfono, Austral Map carga el mismo plan y guarda una copia local en ese navegador. Los planes muy grandes no entran en un QR: copiá el link y abrilo directamente en Chrome para que no se recorte.
+
+> Si probás desde `localhost`, el teléfono no puede abrir la dirección de tu computadora. Usá la URL publicada o configurá `NEXT_PUBLIC_SHARE_ORIGIN` con una URL accesible desde tu red.
 <br/>
 
 ## Privacidad y datos

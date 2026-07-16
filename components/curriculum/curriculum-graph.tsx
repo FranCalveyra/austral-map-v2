@@ -34,8 +34,21 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
   const [loaded, setLoaded] = React.useState(false);
   const [isPanning, setIsPanning] = React.useState(false);
   const [lastPanPoint, setLastPanPoint] = React.useState({ x: 0, y: 0 });
+  const [viewportRevision, setViewportRevision] = React.useState(0);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const lastAutoFitSignatureRef = React.useRef<string | null>(null);
+
+  // The graph owns its viewport. Recalculate when a phone rotates or a tablet
+  // changes split-screen size; relying only on the initial fit leaves the map
+  // at the wrong scale after either event.
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver(() => {
+      setViewportRevision((revision) => revision + 1);
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Filter nodes based on display settings
   const coreNodes = React.useMemo(() => {
@@ -69,8 +82,8 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
   );
 
   const autoFitSignature = React.useMemo(
-    () => String(fitRevision),
-    [fitRevision]
+    () => `${fitRevision}:${viewportRevision}`,
+    [fitRevision, viewportRevision]
   );
 
   // Auto-fit view: compute zoom and panOffset to show all nodes
@@ -96,10 +109,18 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
     const padding = 40;
     const scaleX = containerRect.width / (contentWidth + padding * 2);
     const scaleY = containerRect.height / (contentHeight + padding * 2);
-    const fitZoom = Math.min(scaleX, scaleY, 1);
+    const naturalFitZoom = Math.min(scaleX, scaleY, 1);
+    // A complete five-year plan is much wider than a phone. Fully fitting it
+    // makes nodes unreadable, so compact viewports keep a legible scale and
+    // deliberately expose panning instead of turning the map into a thumbnail.
+    const isCompactViewport = containerRect.width < 1024;
+    const fitZoom = isCompactViewport ? Math.max(naturalFitZoom, 0.68) : naturalFitZoom;
     setZoom(fitZoom);
-    // Center content
-    const offsetX = -minX * fitZoom + (containerRect.width - contentWidth * fitZoom) / 2;
+    // On phones/tablets start from the first year. Centering a wide plan lands
+    // users in the middle of the curriculum without context.
+    const offsetX = isCompactViewport
+      ? 16 - minX * fitZoom
+      : -minX * fitZoom + (containerRect.width - contentWidth * fitZoom) / 2;
     const offsetY = -minY * fitZoom + (containerRect.height - contentHeight * fitZoom) / 2;
     setPanOffset({ x: offsetX, y: offsetY });
     lastAutoFitSignatureRef.current = autoFitSignature;
@@ -212,14 +233,14 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
 
   // Handle touch events for panning on mobile
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (!selectedSubject) {
+    if (!selectedSubject && e.touches.length === 1) {
       setIsPanning(true);
       setLastPanPoint({ x: e.touches[0].clientX, y: e.touches[0].clientY });
     }
   }, [selectedSubject]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (isPanning) {
+    if (isPanning && e.touches.length === 1) {
       const deltaX = e.touches[0].clientX - lastPanPoint.x;
       const deltaY = e.touches[0].clientY - lastPanPoint.y;
       setPanOffset(prev => ({
@@ -355,7 +376,7 @@ export function CurriculumGraph({ nodes, selectedSubject, showLegend, showElecti
       </div>
       
       {/* Zoom Indicator */}
-      <div className="fixed bottom-24 right-4 z-50">
+      <div className="fixed bottom-[calc(20vh+1rem)] right-4 z-50 lg:bottom-24">
         <div className="bg-gray-800 border border-gray-600 text-white px-3 py-2 rounded-lg text-sm font-medium">
           {Math.round(zoom * 100)}%
         </div>

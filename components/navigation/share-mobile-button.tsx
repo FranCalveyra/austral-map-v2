@@ -2,10 +2,15 @@
 
 import React from 'react';
 import { CheckCircle2, Copy, Link2, Share2, Smartphone, X } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface ShareMobileButtonProps {
   onCreateLink?: () => Promise<string>;
 }
+
+// Un QR estándar no puede contener de forma confiable una URL muy larga. El
+// link completo sigue disponible para copiar/compartir sin truncarlo.
+const MAX_QR_URL_LENGTH = 2_000;
 
 export function ShareMobileButton({ onCreateLink }: ShareMobileButtonProps) {
   const [open, setOpen] = React.useState(false);
@@ -32,13 +37,28 @@ export function ShareMobileButton({ onCreateLink }: ShareMobileButtonProps) {
   const copyLink = async () => {
     setError(null);
     try {
-      await navigator.clipboard.writeText(link);
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = link;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        const copied = document.execCommand('copy');
+        textarea.remove();
+        if (!copied) throw new Error('copy failed');
+      }
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       setError('No pude copiar el link automáticamente.');
     }
   };
+
+  const canRenderQr = link.length > 0 && link.length <= MAX_QR_URL_LENGTH;
+  const isLocalLink = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(?::\d+)?\//.test(link);
 
   const shareLink = async () => {
     setError(null);
@@ -105,10 +125,29 @@ export function ShareMobileButton({ onCreateLink }: ShareMobileButtonProps) {
               />
             </div>
 
+            {canRenderQr ? (
+              <div className="mt-3 flex flex-col items-center rounded-lg border border-gray-700 bg-white p-4 text-center">
+                <QRCodeSVG value={link} size={192} level="L" includeMargin />
+                <p className="mt-2 text-xs text-gray-600">Escaneá este QR desde el celular.</p>
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-yellow-300">
+                Este plan es demasiado grande para un QR estándar. El link completo de arriba funciona:
+                copialo y abrilo directamente en Chrome, sin pasarlo por una app que lo recorte.
+              </p>
+            )}
+
+            {isLocalLink ? (
+              <p className="mt-2 text-xs text-yellow-300">
+                Estás compartiendo una dirección local. En el celular usá una URL publicada o configurá
+                <code className="mx-1">NEXT_PUBLIC_SHARE_ORIGIN</code> con una dirección accesible desde tu red.
+              </p>
+            ) : null}
+
             {link.length > 6000 ? (
               <p className="mt-2 text-xs text-yellow-300">
-                El link es largo porque incluye todo el plan. Si alguna app lo corta, usá Copiar link
-                y pegalo directamente en Notas, WhatsApp o AirDrop.
+                El link es largo porque incluye todo el plan. Para conservarlo completo, usá Copiar link
+                y pegalo directamente en Chrome, Notas, WhatsApp o AirDrop.
               </p>
             ) : null}
 

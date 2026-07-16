@@ -30,6 +30,7 @@ export function SubjectNodeComponent({
   const pointerStartRef = React.useRef({ x: 0, y: 0 });
   const dragOffsetRef = React.useRef({ y: 0 });
   const didDragRef = React.useRef(false);
+  const suppressClickRef = React.useRef(false);
 
   const screenYToGraphY = React.useCallback(
     (clientY: number) => (clientY - panOffset.y) / zoom,
@@ -82,11 +83,60 @@ export function SubjectNodeComponent({
     document.body.style.userSelect = '';
   };
 
+  // Nodes used to be draggable only with mouse events. On touch devices a
+  // one-finger gesture now has the same contract: tap selects; a vertical move
+  // repositions the node. The graph receives touches only outside a node and
+  // pans there, so the two gestures do not compete.
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length !== 1) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const touch = e.touches[0];
+    setIsDragging(true);
+    didDragRef.current = false;
+    pointerStartRef.current = { x: touch.clientX, y: touch.clientY };
+    dragOffsetRef.current = { y: screenYToGraphY(touch.clientY) - subject.y };
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd, { passive: false });
+    document.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (
+      Math.abs(touch.clientX - pointerStartRef.current.x) > 6 ||
+      Math.abs(touch.clientY - pointerStartRef.current.y) > 6
+    ) {
+      didDragRef.current = true;
+    }
+    const newY = screenYToGraphY(touch.clientY) - dragOffsetRef.current.y;
+    onDrag(subject.ID, subject.x, newY);
+  };
+
+  const handleTouchEnd = () => {
+    const didDrag = didDragRef.current;
+    setIsDragging(false);
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
+    document.removeEventListener('touchcancel', handleTouchEnd);
+    // prevent the synthetic click emitted after a touch from selecting twice.
+    suppressClickRef.current = true;
+    window.setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 0);
+    if (!didDrag) onClick(subject);
+  };
+
   // Clean up on unmount
   React.useEffect(() => {
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('touchcancel', handleTouchEnd);
       document.body.style.userSelect = '';
     };
   }, []);
@@ -158,8 +208,10 @@ export function SubjectNodeComponent({
         willChange: isDragging ? 'transform' : 'auto'
       }}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
       onClick={(e) => {
         e.stopPropagation();
+        if (suppressClickRef.current) return;
         if (didDragRef.current) {
           didDragRef.current = false;
           return;
