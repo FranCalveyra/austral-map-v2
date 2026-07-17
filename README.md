@@ -1,4 +1,16 @@
 # Austral Map
+
+<p align="center">
+  <img src="public/assets/austral-map-icon.png" alt="Austral Map" width="128" height="128" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-38BDF8?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/github/license/FranCalveyra/austral-map-v2" alt="License" />
+</p>
 <br/>
 
 ## ¡Hola! 👋
