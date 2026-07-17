@@ -39,7 +39,7 @@ export function Navbar({
       <div className="lg:hidden flex items-center justify-between px-2 py-2 bg-[#21262d]">
         <Menu className="h-6 w-6 text-white" onClick={() => setIsOpen(true)} />
         <div className="flex min-w-0 items-center space-x-2">
-          <Logo className="h-6 w-6" />
+          <Logo className="h-6 w-6 rounded-lg" />
           <TitleSection careerName={careerName} planName={planName} studentName={studentName} />
         </div>
       </div>

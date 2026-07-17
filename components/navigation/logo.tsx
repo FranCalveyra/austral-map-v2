@@ -2,12 +2,12 @@ interface LogoProps {
   className?: string;
 }
 
-export function Logo({ className = "h-12 w-12 brightness-0 invert" }: LogoProps) {
+export function Logo({ className = "h-12 w-12 rounded-lg" }: LogoProps) {
   return (
-    <img 
-      src="/assets/austral-logo.svg" 
-      alt="Universidad Austral" 
-      className={className} 
+    <img
+      src="/assets/austral-map-icon.png"
+      alt="Austral Map"
+      className={className}
     />
   );
 } 
